@@ -51,9 +51,114 @@ const ICONS = {
   play: '<path d="M9 6l10 6-10 6V6Z"/>',
   whatsapp: '<path d="M7 17l-3 1 1-3a8 8 0 1 1 2 2Z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5.5 0 1-.7.8-1.2l-.6-1.2a.6.6 0 0 0-.7-.3l-1 .3a4 4 0 0 1-2.6-2.6l.3-1a.6.6 0 0 0-.3-.7L9.2 8.2c-.5-.2-1.2.3-1.2.8Z"/>',
   facebook: '<path d="M14 21v-7h2.3l.4-3H14V9c0-.9.2-1.5 1.5-1.5H17V4.9c-.3 0-1.2-.1-2.3-.1-2.3 0-3.7 1.4-3.7 3.9V11H8.5v3H11v7h3Z"/>',
+  youtube: '<rect x="3" y="6" width="18" height="12" rx="4"/><path d="M10.5 9.5l5 2.5-5 2.5v-5Z"/>',
+  instagram: '<rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M16.2 7.6h.01"/>',
+  tiktok: '<path d="M13.5 3.5v10.8a3 3 0 1 1-2.6-2.97"/><path d="M13.5 3.5c.35 2.4 2.05 4.1 4.3 4.4"/>',
 };
 
 function icon(name){ return `<svg viewBox="0 0 24 24">${ICONS[name]||ICONS.link}</svg>`; }
+
+/* ---------------------------------------------------------
+   URL HELPERS
+   - resolveUrl(): if someone pastes a normal github.com "blob" page
+     link (what you get from browsing the repo in a browser and
+     copying the address bar), it silently rewrites it to the raw
+     file link so the browser can actually load the image/video —
+     this is why pasted GitHub links were showing as broken media.
+   - youTubeEmbedUrl(): turns any youtube.com/youtu.be link into an
+     embeddable player URL, or null if it isn't a YouTube link.
+   - platformInfo(): guesses a nice Bangla label + icon for a bare
+     link based on its domain (Facebook, Instagram, TikTok, Telegram,
+     WhatsApp, Google Drive, YouTube, or a generic link).
+--------------------------------------------------------- */
+function resolveUrl(url){
+  const m = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^?#]+?)\/?(\?.*)?$/i);
+  if(m){
+    const [, owner, repo, path] = m;
+    return `https://raw.githubusercontent.com/${owner}/${repo}/${path}`;
+  }
+  return url;
+}
+
+function youTubeEmbedUrl(url){
+  let u;
+  try{ u = new URL(url); }catch(e){ return null; }
+  const host = u.hostname.replace(/^www\.|^m\./,"");
+  let id = "";
+  if(host === "youtu.be") id = u.pathname.slice(1);
+  else if(host === "youtube.com" || host === "youtube-nocookie.com"){
+    if(u.pathname === "/watch") id = u.searchParams.get("v") || "";
+    else if(u.pathname.startsWith("/shorts/")) id = u.pathname.split("/")[2] || "";
+    else if(u.pathname.startsWith("/embed/")) id = u.pathname.split("/")[2] || "";
+  } else return null;
+  id = (id || "").split("&")[0].split("?")[0];
+  return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+}
+
+function platformInfo(url){
+  let host = "";
+  try{ host = new URL(url).hostname.replace(/^www\./,""); }catch(e){}
+  if(/youtube\.com$|youtu\.be$/.test(host)) return { label:"ইউটিউব", icon:"youtube" };
+  if(/facebook\.com$|fb\.watch$/.test(host)) return { label:"ফেসবুক", icon:"facebook" };
+  if(/instagram\.com$/.test(host)) return { label:"ইনস্টাগ্রাম", icon:"instagram" };
+  if(/tiktok\.com$/.test(host)) return { label:"টিকটক", icon:"tiktok" };
+  if(/t\.me$|telegram\.org$/.test(host)) return { label:"টেলিগ্রাম", icon:"chat" };
+  if(/wa\.me$|whatsapp\.com$/.test(host)) return { label:"হোয়াটসঅ্যাপ", icon:"whatsapp" };
+  if(/drive\.google\.com$/.test(host)) return { label:"ড্রাইভ ফাইল", icon:"drive" };
+  return { label:"লিংক", icon:"link" };
+}
+
+const IMG_EXT_RE = /\.(jpe?g|png|gif|webp|avif|bmp)(\?.*)?$/i;
+const VID_EXT_RE = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
+const AUD_EXT_RE = /\.(mp3|wav|m4a|aac|flac|ogg)(\?.*)?$/i;
+
+/* A bare link line (no DATE:/IMG:/etc. tag in front of it) gets
+   auto-classified instead of being dropped into plain text — this
+   is the "-  Link  -" style you were already using. */
+function classifyBareUrl(post, rawUrl){
+  const url = resolveUrl(rawUrl.trim());
+  const yt = youTubeEmbedUrl(url);
+  if(yt){ post.embeds.push({ platform:"youtube", embedUrl: yt }); return; }
+  if(IMG_EXT_RE.test(url)){ post.images.push(url); return; }
+  if(VID_EXT_RE.test(url)){ post.videos.push(url); return; }
+  if(AUD_EXT_RE.test(url)){ post.audios.push(url); return; }
+  const info = platformInfo(url);
+  post.links.push({ url, label: info.label, kind: info.icon });
+}
+
+/* Parses "15 Jan 2026" style dates (and simple Bangla-numeral /
+   Bangla-month variants) into a sortable timestamp, or null if the
+   date can't be understood. */
+const BN_MONTHS = { "জানুয়ারি":0,"ফেব্রুয়ারি":1,"মার্চ":2,"এপ্রিল":3,"মে":4,"জুন":5,"জুলাই":6,"আগস্ট":7,"সেপ্টেম্বর":8,"অক্টোবর":9,"নভেম্বর":10,"ডিসেম্বর":11 };
+function parseFlexibleDate(str){
+  if(!str) return null;
+  const bnDigits = "০১২৩৪৫৬৭৮৯";
+  const normalized = str.replace(/[০-৯]/g, d => bnDigits.indexOf(d));
+  const bnMatch = normalized.match(/^(\d{1,2})\s+([^\s\d]+)\s+(\d{4})$/);
+  if(bnMatch && BN_MONTHS.hasOwnProperty(bnMatch[2])){
+    return new Date(Number(bnMatch[3]), BN_MONTHS[bnMatch[2]], Number(bnMatch[1])).getTime();
+  }
+  const d = new Date(normalized);
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
+
+/* Newest first. Posts with a real DATE: are ordered by that date;
+   posts with no date fall after the dated ones, in reverse file
+   order (so the most recently *added* undated post still floats
+   to the top of that group). Used for every feed — subjects and
+   social alike. */
+function sortPostsLatestFirst(posts){
+  return posts
+    .map((post, i) => ({ post, i, ts: parseFlexibleDate(post.date) }))
+    .sort((a, b) => {
+      if(a.ts != null && b.ts != null) return b.ts - a.ts;
+      if(a.ts != null) return -1;
+      if(b.ts != null) return 1;
+      return b.i - a.i;
+    })
+    .map(x => x.post);
+}
+
 
 /* ---------------------------------------------------------
    POST TEXT-FILE PARSER
@@ -73,10 +178,16 @@ function icon(name){ return `<svg viewBox="0 0 24 24">${ICONS[name]||ICONS.link}
    Recognised tags (case-insensitive), one per line:
      DATE: 15 Jan 2026
      IMG:  https://...              (repeatable -> photo gallery)
-     VID:  https://...              (repeatable -> video gallery)
+     VID:  https://...              (repeatable -> video gallery, or a YouTube link -> embedded player)
      AUD:  https://...              (repeatable -> audio track)
      DRIVE: https://... (লেবেল)     (repeatable -> drive button)
      LINK:  https://... (লেবেল)     (repeatable -> link button)
+   A bare link with no tag in front of it (just the URL on its own
+   line) is auto-detected too: an image/video/audio file extension
+   becomes a gallery item, a YouTube link becomes an embedded player,
+   and anything else (Facebook, Instagram, TikTok, a Drive link...)
+   becomes a labelled button. A normal github.com/.../blob/... link
+   is automatically rewritten to the working raw-file link.
    Any other line is treated as post text.
 --------------------------------------------------------- */
 function parsePosts(raw){
@@ -93,31 +204,42 @@ function parsePosts(raw){
   }
   blocks.push(current);
 
+  const urlLineRe = /^https?:\/\/\S+$/i;
   const posts = [];
   for(const block of blocks){
     const lines = block.map(l=>l.trim()).filter(l=>l.length && !l.startsWith("#"));
     if(!lines.length) continue;
-    const post = { date:"", text:[], images:[], videos:[], audios:[], links:[] };
+    const post = { date:"", text:[], images:[], videos:[], audios:[], links:[], embeds:[] };
     for(const line of lines){
       const m = line.match(/^(DATE|IMG|VID|AUD|DRIVE|LINK)\s*:\s*(.+)$/i);
-      if(!m){ post.text.push(line); continue; }
+      if(!m){
+        if(urlLineRe.test(line)){ classifyBareUrl(post, line); continue; }
+        post.text.push(line);
+        continue;
+      }
       const tag = m[1].toUpperCase();
       const val = m[2].trim();
       if(tag === "DATE") post.date = val;
-      else if(tag === "IMG") post.images.push(val);
-      else if(tag === "VID") post.videos.push(val);
-      else if(tag === "AUD") post.audios.push(val);
+      else if(tag === "IMG") post.images.push(resolveUrl(val));
+      else if(tag === "VID"){
+        const yt = youTubeEmbedUrl(resolveUrl(val));
+        if(yt) post.embeds.push({ platform:"youtube", embedUrl: yt });
+        else post.videos.push(resolveUrl(val));
+      }
+      else if(tag === "AUD") post.audios.push(resolveUrl(val));
       else if(tag === "DRIVE" || tag === "LINK"){
         const lm = val.match(/^(\S+)\s*\((.+)\)\s*$/);
+        const url = resolveUrl(lm ? lm[1] : val);
+        const info = platformInfo(url);
         post.links.push({
-          url: lm ? lm[1] : val,
-          label: lm ? lm[2] : (tag === "DRIVE" ? "ড্রাইভ ফাইল" : "লিংক"),
-          kind: tag.toLowerCase()
+          url,
+          label: lm ? lm[2] : (tag === "DRIVE" ? "ড্রাইভ ফাইল" : info.label),
+          kind: tag === "DRIVE" ? "drive" : info.icon
         });
       }
     }
     post.text = post.text.join("\n");
-    if(post.text || post.images.length || post.videos.length || post.audios.length || post.links.length){
+    if(post.text || post.images.length || post.videos.length || post.audios.length || post.links.length || post.embeds.length){
       posts.push(post);
     }
   }
@@ -148,6 +270,10 @@ function renderPost(post){
   const mediaHtml = media.length
     ? `<div class="post-media-grid ${media.length===1?'single':''}">${media.map((m,i)=>mediaThumbHtml(m.kind,m.src,i)).join("")}</div>`
     : "";
+  const embedsHtml = (post.embeds||[]).map(e=>`
+    <div class="post-embed">
+      <iframe src="${escapeHtml(e.embedUrl)}" title="ভিডিও" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>`).join("");
   const audioHtml = post.audios.map(src=>`
     <div class="post-audio" data-src="${escapeHtml(src)}">
       <span class="post-audio-icon">${icon("play")}</span>
@@ -156,13 +282,14 @@ function renderPost(post){
   const linksHtml = post.links.length
     ? `<div class="post-links">${post.links.map(l=>`
         <a class="post-link" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">
-          ${icon(l.kind==="drive"?"drive":"link")}${escapeHtml(l.label)}
+          ${icon(l.kind)}${escapeHtml(l.label)}
         </a>`).join("")}</div>`
     : "";
   return `<article class="post">
     ${post.date ? `<p class="post-date">${escapeHtml(post.date)}</p>` : ""}
     ${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ""}
     ${mediaHtml}
+    ${embedsHtml}
     ${audioHtml}
     ${linksHtml}
   </article>`;
@@ -215,7 +342,7 @@ async function openFeed({kicker, title, emptyText, loader}){
   feedBody.scrollTop = 0;
 
   try{
-    const posts = await loader();
+    const posts = sortPostsLatestFirst(await loader());
     feedLoading.hidden = true;
     if(!posts.length){
       feedEmpty.hidden = false;
@@ -400,13 +527,22 @@ if(pDays){ updatePulse(); setInterval(updatePulse, 1000); }
    TILE LIGHT — tracks the pointer over any .tile and feeds it
    into --mx/--my so the glass specular highlight (style.css)
    follows the cursor, like light catching a tilted glass pane.
+   Coalesced onto rAF so it never fires more than once per frame.
 --------------------------------------------------------- */
+let pendingGlowEvent = null;
 document.addEventListener("pointermove", e => {
   const tile = e.target.closest(".tile");
   if(!tile) return;
-  const r = tile.getBoundingClientRect();
-  tile.style.setProperty("--mx", `${((e.clientX - r.left) / r.width * 100).toFixed(1)}%`);
-  tile.style.setProperty("--my", `${((e.clientY - r.top) / r.height * 100).toFixed(1)}%`);
+  if(pendingGlowEvent === null){
+    requestAnimationFrame(() => {
+      const { tile: t, clientX, clientY } = pendingGlowEvent;
+      pendingGlowEvent = null;
+      const r = t.getBoundingClientRect();
+      t.style.setProperty("--mx", `${((clientX - r.left) / r.width * 100).toFixed(1)}%`);
+      t.style.setProperty("--my", `${((clientY - r.top) / r.height * 100).toFixed(1)}%`);
+    });
+  }
+  pendingGlowEvent = { tile, clientX: e.clientX, clientY: e.clientY };
 });
 
 /* ---------------------------------------------------------
