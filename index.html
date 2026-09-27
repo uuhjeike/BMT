@@ -1,167 +1,132 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#07090d">
-  <title>BMT</title>
-  <meta name="description" content="BMT — Study Hub">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMT — হোমওয়ার্ক ও ক্লাসওয়ার্ক</title>
+<meta name="description" content="সব বিষয়ের হোমওয়ার্ক, ক্লাসওয়ার্ক ও নোট একসাথে — BMT, বন্ধুদের সাথে শেয়ার করার জন্য একটি স্টাডি হাব।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="ambient ambient-1"></div>
-  <div class="ambient ambient-2"></div>
-  <div class="ambient ambient-3"></div>
-  <div class="noise"></div>
+<div class="grain"></div>
+<div class="blobs" aria-hidden="true">
+  <span class="blob blob-gold"></span>
+  <span class="blob blob-teal"></span>
+  <span class="blob blob-rust"></span>
+</div>
 
-  <nav class="nav glass">
-    <a class="logo" href="#top" aria-label="BMT Home">BMT</a>
-    <div class="nav-links">
-      <a href="#subjects">বিষয়</a>
-      <a href="#teachers">স্যার</a>
-      <a href="#social">সোশ্যাল</a>
-    </div>
-  </nav>
+<!-- ===== NAV ===== -->
+<nav class="nav" id="nav">
+  <a href="#top" class="nav-mark">
+    <span class="nav-mark-ink">BM</span><span class="nav-mark-gold">T</span>
+  </a>
+  <div class="nav-links">
+    <a href="#subjects">বিষয়সমূহ</a>
+    <a href="#teachers">শিক্ষকবৃন্দ</a>
+    <a href="#social">যোগাযোগ</a>
+  </div>
+</nav>
 
-  <header class="hero" id="top">
-    <div class="hero-inner">
+<!-- ===== UNSTOPPABLE ISLAND — floating liquid-glass HUD, always on top of everything ===== -->
+<div class="island" id="island">
+  <span class="island-orb"></span>
+  <span class="island-tag">UNSTOPPABLE <em>২৪ সেপ্টেম্বর ২০২৬ থেকে</em></span>
+  <div class="island-clock" id="islandClock">
+    <div class="island-unit"><span id="pDays">0</span><small>দিন</small></div>
+    <div class="island-unit"><span id="pHours">00</span><small>ঘণ্টা</small></div>
+    <div class="island-unit"><span id="pMins">00</span><small>মিনিট</small></div>
+    <div class="island-unit"><span id="pSecs">00</span><small>সেকেন্ড</small></div>
+  </div>
+</div>
 
-      <div class="eyebrow glass-pill">
-        <span class="live-dot"></span>
-        BMT • STUDY HUB
-      </div>
-
-      <h1>BMT</h1>
-      <p class="hero-lead">পড়াশোনা থামবে না।</p>
-      <p class="hero-sub">
-        সকল বিষয়, বাংলা নোট, স্যারদের নম্বর এবং সোশ্যাল লিংক—
-        একটি পরিষ্কার Liquid Glass অভিজ্ঞতায়।
-      </p>
-
-      <!-- IMPORTANT: stopwatch begins at 24 September 2026 -->
-      <section class="unstoppable glass" aria-label="Unstoppable stopwatch">
-        <div class="unstoppable-label">
-          <span class="pulse"></span>
-          UNSTOPPABLE
-        </div>
-
-        <div class="unstoppable-date">২৪ সেপ্টেম্বর ২০২৬ থেকে</div>
-
-        <div class="timer" id="timer" aria-live="polite">
-          <div class="time-box">
-            <strong id="days">0</strong>
-            <span>দিন</span>
-          </div>
-          <i>:</i>
-          <div class="time-box">
-            <strong id="hours">00</strong>
-            <span>ঘণ্টা</span>
-          </div>
-          <i>:</i>
-          <div class="time-box">
-            <strong id="minutes">00</strong>
-            <span>মিনিট</span>
-          </div>
-          <i>:</i>
-          <div class="time-box">
-            <strong id="seconds">00</strong>
-            <span>সেকেন্ড</span>
-          </div>
-        </div>
-
-        <div class="unstoppable-bottom">থামার কোনো পরিকল্পনা নেই।</div>
-      </section>
-
-      <div class="hero-actions">
-        <a class="action-button glass-button primary" href="#subjects">
-          <span>বিষয়সমূহ</span><b>→</b>
-        </a>
-        <a class="action-button glass-button" href="#teachers">
-          <span>স্যারের নম্বর</span><b>→</b>
-        </a>
-        <a class="action-button glass-button" href="#social">
-          <span>Social</span><b>→</b>
-        </a>
-      </div>
-    </div>
-
-    <a class="scroll-down" href="#subjects" aria-label="Scroll to subjects">
-      <span></span>
-    </a>
-  </header>
-
-  <main>
-    <section class="section" id="subjects">
-      <div class="section-head">
-        <div>
-          <span class="section-kicker">01 / SUBJECTS</span>
-          <h2>বিষয়সমূহ</h2>
-        </div>
-        <p>কার্ডে চাপ দিলে GitHub-এর TXT ফাইলটি সরাসরি বাংলা লেখায় খুলবে।</p>
-      </div>
-
-      <div class="card-grid" id="subjectsGrid"></div>
-    </section>
-
-    <section class="section" id="teachers">
-      <div class="section-head">
-        <div>
-          <span class="section-kicker">02 / CONTACT</span>
-          <h2>স্যারদের নম্বর</h2>
-        </div>
-        <p>নম্বর যোগ করলে এগুলোও বিষয়ের মতো কাজ করা Liquid Glass button হবে।</p>
-      </div>
-
-      <div class="contact-grid" id="teachersGrid"></div>
-    </section>
-
-    <section class="section" id="social">
-      <div class="section-head">
-        <div>
-          <span class="section-kicker">03 / CONNECT</span>
-          <h2>Social</h2>
-        </div>
-        <p>আপনার Social/Group link এখানে একই button system-এ কাজ করবে।</p>
-      </div>
-
-      <div class="contact-grid" id="socialGrid"></div>
-    </section>
-  </main>
-
-  <!-- Bengali TXT reader -->
-  <div class="reader-overlay" id="readerOverlay" aria-hidden="true">
-    <div class="reader glass">
-      <div class="reader-head">
-        <div>
-          <span class="section-kicker">BMT / TXT READER</span>
-          <h2 id="readerTitle">—</h2>
-        </div>
-
-        <div class="reader-head-actions">
-          <a id="rawLink" class="mini-button" target="_blank" rel="noopener">RAW</a>
-          <button id="closeReader" class="mini-button close-button" type="button" aria-label="Close">×</button>
-        </div>
-      </div>
-
-      <div class="reader-content">
-        <div id="readerLoading" class="reader-state">বাংলা ফাইল লোড হচ্ছে…</div>
-        <pre id="readerText" class="bangla-text"></pre>
-        <div id="readerError" class="reader-state error" hidden></div>
-      </div>
+<!-- ===== HERO ===== -->
+<header class="hero" id="top">
+  <div class="hero-lines" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div class="hero-inner">
+    <p class="hero-eyebrow">BMT · প্রথম বর্ষ · ব্যবসায় শিক্ষা</p>
+    <h1 class="hero-title">
+      <span class="line" id="heroLine1">সব পড়া,</span>
+      <span class="line" id="heroLine2">এক জায়গায়।</span>
+      <svg class="hero-underline" viewBox="0 0 520 24" preserveAspectRatio="none" aria-hidden="true">
+        <path id="underlinePath" d="M4 14 C 120 4, 240 20, 360 10 S 480 4, 516 12" />
+      </svg>
+    </h1>
+    <p class="hero-sub">হোমওয়ার্ক, ক্লাসওয়ার্ক আর নোট — একটা টেক্সট ফাইলে লিখলেই এখানে নিজে থেকে যোগ হয়ে যাবে। বন্ধুদের সাথে শেয়ার করো, একসাথে এগিয়ে যাও।</p>
+    <div class="hero-actions">
+      <a href="#subjects" class="btn btn-gold">বিষয় দেখো</a>
+      <a href="#teachers" class="btn btn-ghost">স্যার/ম্যাডামের নম্বর</a>
     </div>
   </div>
+  <div class="hero-scroll" aria-hidden="true"><span></span></div>
+</header>
 
-  <footer>
-    <strong>BMT</strong>
-    <span>Keep going. Stay unstoppable.</span>
-  </footer>
+<!-- ===== SUBJECTS ===== -->
+<main>
+<section class="section subjects" id="subjects">
+  <div class="section-head">
+    <h2>বিষয়সমূহ</h2>
+    <p class="section-note">যেকোনো ট্যাবে ক্লিক করলে সেই বিষয়ের সব পোস্ট খুলবে</p>
+  </div>
+  <div class="shelf" id="shelf"><!-- subject folder-cards injected by script.js --></div>
+</section>
 
-  <script src="script.js"></script>
+<!-- ===== TEACHERS ===== -->
+<section class="section teachers" id="teachers">
+  <div class="section-head">
+    <h2>শিক্ষকবৃন্দ</h2>
+    <p class="section-note">দরকারে সরাসরি কল বা মেসেজ করো</p>
+  </div>
+  <div class="teacher-grid" id="teacherGrid"><!-- injected --></div>
+</section>
+
+<!-- ===== SOCIAL ===== -->
+<section class="section social" id="social">
+  <div class="section-head">
+    <h2>সবার সাথে যুক্ত থাকো</h2>
+    <p class="section-note">গ্রুপ ও পেজের লিংক</p>
+  </div>
+  <div class="social-row" id="socialRow"><!-- injected --></div>
+</section>
+</main>
+
+<footer class="footer">
+  <p>বানানো হয়েছে যত্ন করে, নিজেদের পড়াশোনার জন্য।</p>
+</footer>
+
+<!-- ===== SUBJECT FEED PANEL ===== -->
+<div class="feed-overlay" id="feedOverlay">
+  <div class="feed-panel" id="feedPanel" role="dialog" aria-modal="true" aria-labelledby="feedTitle">
+    <div class="feed-header">
+      <div class="feed-header-text">
+        <p class="feed-kicker" id="feedKicker">বিষয়</p>
+        <h2 id="feedTitle">—</h2>
+      </div>
+      <button class="feed-close" id="feedClose" aria-label="বন্ধ করো">
+        <svg viewBox="0 0 24 24"><path d="M5 5 L19 19 M19 5 L5 19"/></svg>
+      </button>
+    </div>
+    <div class="feed-body" id="feedBody">
+      <div class="feed-loading" id="feedLoading">লোড হচ্ছে…</div>
+      <div class="feed-posts" id="feedPosts"></div>
+      <div class="feed-empty" id="feedEmpty" hidden>এখনো কোনো পোস্ট নেই। প্রথম হোমওয়ার্কটা এখানেই যোগ হবে।</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LIGHTBOX ===== -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="বন্ধ করো">
+    <svg viewBox="0 0 24 24"><path d="M5 5 L19 19 M19 5 L5 19"/></svg>
+  </button>
+  <div class="lightbox-stage" id="lightboxStage"></div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
