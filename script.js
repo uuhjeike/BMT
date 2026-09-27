@@ -200,9 +200,13 @@ const feedLoading = document.getElementById("feedLoading");
 const feedEmpty = document.getElementById("feedEmpty");
 const feedBody = document.getElementById("feedBody");
 
-async function openSubject(subject){
-  feedKicker.textContent = "বিষয়";
-  feedTitle.textContent = subject.name;
+/* Shared by every feed source (subjects + social): opens the same
+   sliding panel, shows the loading/empty states, and renders posts.
+   `loader` is an async function that returns a posts[] array (or
+   throws, with a message to show in the empty state). */
+async function openFeed({kicker, title, emptyText, loader}){
+  feedKicker.textContent = kicker;
+  feedTitle.textContent = title;
   feedPosts.innerHTML = "";
   feedEmpty.hidden = true;
   feedLoading.hidden = false;
@@ -211,27 +215,77 @@ async function openSubject(subject){
   feedBody.scrollTop = 0;
 
   try{
-    let posts = postCache[subject.name];
-    if(!posts){
-      const res = await fetch(subject.file, {cache:"no-store"});
-      if(!res.ok) throw new Error("not found");
-      const raw = await res.text();
-      posts = parsePosts(raw);
-      postCache[subject.name] = posts;
-      const countEl = document.getElementById(subject.domId);
-      if(countEl) countEl.textContent = posts.length ? `${posts.length} পোস্ট` : "";
-    }
+    const posts = await loader();
     feedLoading.hidden = true;
-    if(!posts.length){ feedEmpty.hidden = false; return; }
+    if(!posts.length){
+      feedEmpty.hidden = false;
+      feedEmpty.textContent = emptyText || "এখনো কোনো পোস্ট নেই। প্রথম হোমওয়ার্কটা এখানেই যোগ হবে।";
+      return;
+    }
     feedPosts.innerHTML = posts.map(renderPost).join("");
     [...feedPosts.children].forEach((el,i)=> el.style.animationDelay = `${Math.min(i*0.05,0.5)}s`);
     bindMediaHandlers(feedPosts);
   }catch(err){
     feedLoading.hidden = true;
     feedEmpty.hidden = false;
-    feedEmpty.textContent = "GitHub রিপোতে এখনো এই বিষয়ের ফাইল পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"" + subject.name + ".txt\" আপলোড করো।";
+    feedEmpty.textContent = err.message || "লোড করা যায়নি।";
   }
 }
+
+function openSubject(subject){
+  openFeed({
+    kicker: "বিষয়",
+    title: subject.name,
+    async loader(){
+      let posts = postCache[subject.name];
+      if(!posts){
+        const res = await fetch(subject.file, {cache:"no-store"});
+        if(!res.ok) throw new Error("GitHub রিপোতে এখনো এই বিষয়ের ফাইল পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"" + subject.name + ".txt\" আপলোড করো।");
+        const raw = await res.text();
+        posts = parsePosts(raw);
+        postCache[subject.name] = posts;
+        const countEl = document.getElementById(subject.domId);
+        if(countEl) countEl.textContent = posts.length ? `${posts.length} পোস্ট` : "";
+      }
+      return posts;
+    }
+  });
+}
+
+/* ---------------------------------------------------------
+   SOCIAL FEED — social.txt is now written with the exact same
+   post syntax as a subject file (DATE / IMG / VID / AUD / LINK,
+   blocks separated by "-" lines). Put your WhatsApp/Facebook/
+   Telegram links in a LINK: line inside each post, e.g.:
+
+     -
+     DATE: 15 Jan 2026
+     নতুন হোয়াটসঅ্যাপ গ্রুপ খোলা হয়েছে, সবাই জয়েন করো।
+     LINK: https://chat.whatsapp.com/xxxx (হোয়াটসঅ্যাপ গ্রুপ)
+     -
+
+   Clicking "যোগাযোগ" in the nav opens this as its own feed panel —
+   it is no longer a section on the homepage.
+--------------------------------------------------------- */
+let socialCache = null;
+
+function openSocialFeed(){
+  openFeed({
+    kicker: "যোগাযোগ",
+    title: "সবার সাথে যুক্ত থাকো",
+    emptyText: "GitHub রিপোতে এখনো social.txt পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"social.txt\" আপলোড করো (বিষয়ের ফাইলের মতোই DATE/LINK ফরম্যাটে)।",
+    async loader(){
+      if(!socialCache){
+        const res = await fetch(SOCIAL_FILE, {cache:"no-store"});
+        if(!res.ok) throw new Error();
+        const raw = await res.text();
+        socialCache = parsePosts(raw);
+      }
+      return socialCache;
+    }
+  });
+}
+document.getElementById("navSocial").addEventListener("click", openSocialFeed);
 
 function closeFeed(){
   feedOverlay.classList.remove("open");
@@ -317,46 +371,7 @@ async function loadTeachers(){
   }
 }
 
-/* ---------------------------------------------------------
-   SOCIAL  — data/social.txt lines: Label | URL
---------------------------------------------------------- */
-function socialIcon(label){
-  const l = label.toLowerCase();
-  if(l.includes("whatsapp")) return "whatsapp";
-  if(l.includes("facebook")) return "facebook";
-  if(l.includes("telegram") || l.includes("messenger")) return "chat";
-  return "link";
-}
-
-async function loadSocial(){
-  const row = document.getElementById("socialRow");
-  const tabs = ["teal","gold","rust"];
-  try{
-    const res = await fetch(SOCIAL_FILE, {cache:"no-store"});
-    if(!res.ok) throw new Error();
-    const raw = await res.text();
-    const rows = raw.split("\n").map(l=>l.trim()).filter(l=>l && !l.startsWith("#"));
-    if(!rows.length) throw new Error();
-    row.innerHTML = rows.map((r,i)=>{
-      const [label="", url=""] = r.split("|").map(p=>p.trim());
-      const tab = tabs[i % tabs.length];
-      return `<a class="tile social-tile" style="--tab:var(--${tab})" href="${escapeHtml(url)}" target="_blank" rel="noopener">
-        <div class="folder-icon">${icon(socialIcon(label))}</div>
-        <div class="folder-name">${escapeHtml(label)}</div>
-        <div class="folder-meta"><span>যুক্ত হতে ক্লিক করো</span></div>
-      </a>`;
-    }).join("");
-  }catch(err){
-    row.innerHTML = `<a class="tile tile-ghost" href="https://github.com/uuhjeike/BMT/edit/main/social.txt" target="_blank" rel="noopener">
-      <div class="folder-icon">${icon("link")}</div>
-      <div class="folder-name">এখানে গ্রুপ/পেজের লিংক দেখাবে</div>
-      <div class="folder-meta"><span>uuhjeike/BMT রিপোর social.txt-এ লিখো — নাম | URL</span></div>
-    </a>`;
-  }
-}
-
 loadTeachers();
-loadSocial();
 
 /* ---------------------------------------------------------
    PULSE BAR — "unstoppable" stopwatch, counting up since
@@ -380,3 +395,35 @@ function updatePulse(){
   pSecs.textContent = pad(totalSec%60);
 }
 if(pDays){ updatePulse(); setInterval(updatePulse, 1000); }
+
+/* ---------------------------------------------------------
+   TILE LIGHT — tracks the pointer over any .tile and feeds it
+   into --mx/--my so the glass specular highlight (style.css)
+   follows the cursor, like light catching a tilted glass pane.
+--------------------------------------------------------- */
+document.addEventListener("pointermove", e => {
+  const tile = e.target.closest(".tile");
+  if(!tile) return;
+  const r = tile.getBoundingClientRect();
+  tile.style.setProperty("--mx", `${((e.clientX - r.left) / r.width * 100).toFixed(1)}%`);
+  tile.style.setProperty("--my", `${((e.clientY - r.top) / r.height * 100).toFixed(1)}%`);
+});
+
+/* ---------------------------------------------------------
+   SCROLL REVEAL — fades/rises .reveal elements in as they
+   enter the viewport (section headings, the unstoppable panel).
+--------------------------------------------------------- */
+const revealItems = document.querySelectorAll(".reveal");
+if("IntersectionObserver" in window && revealItems.length){
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add("in");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2, rootMargin: "0px 0px -8% 0px" });
+  revealItems.forEach(el => revealObserver.observe(el));
+} else {
+  revealItems.forEach(el => el.classList.add("in"));
+}
