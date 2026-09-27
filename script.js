@@ -247,7 +247,9 @@ const lightbox = document.getElementById("lightbox");
 const lightboxStage = document.getElementById("lightboxStage");
 
 function openLightbox(kind, src){
-  if(kind === "img") lightboxStage.innerHTML = `<img src="${escapeHtml(src)}" alt="">`;
+  if(kind === "img") lightboxStage.innerHTML = `
+    <img src="${escapeHtml(src)}" alt="" decoding="async">
+    <a class="lightbox-original" href="${escapeHtml(src)}" target="_blank" rel="noopener">মূল ছবি নতুন ট্যাবে দেখো (আসল কোয়ালিটি)</a>`;
   else if(kind === "vid") lightboxStage.innerHTML = `<video src="${escapeHtml(src)}" controls autoplay playsinline></video>`;
   else if(kind === "aud") lightboxStage.innerHTML = `<audio src="${escapeHtml(src)}" controls autoplay></audio>`;
   lightbox.classList.add("open");

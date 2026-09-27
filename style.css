@@ -84,6 +84,32 @@ button{font-family:inherit;}
   66%{transform:translate(-3vw,4vw) scale(0.95);}
 }
 
+/* ================= PARTICLES — light drifting motes =================
+   transform + opacity only, no filter, no layout/paint cost — this is
+   the cheap kind of motion, unlike the blob glow above. Safe to run
+   20+ of these continuously. */
+.particles{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;}
+.particle{
+  position:absolute; bottom:-4%; left:var(--x,50%);
+  width:var(--size,3px); height:var(--size,3px); border-radius:50%;
+  opacity:0;
+  animation:particleRise var(--dur,18s) linear infinite;
+  animation-delay:var(--delay,0s);
+}
+.particle-gold{background:var(--gold); box-shadow:0 0 6px 1px rgba(224,178,94,0.6);}
+.particle-teal{background:var(--teal); box-shadow:0 0 6px 1px rgba(70,199,179,0.6);}
+.particle-rust{background:var(--rust); box-shadow:0 0 6px 1px rgba(197,106,69,0.6);}
+@keyframes particleRise{
+  0%{transform:translateY(0) translateX(0); opacity:0;}
+  8%{opacity:0.75;}
+  50%{transform:translateY(-55vh) translateX(2vw);}
+  92%{opacity:0.4;}
+  100%{transform:translateY(-105vh) translateX(-2vw); opacity:0;}
+}
+@media (prefers-reduced-motion: reduce){
+  .particles{display:none;}
+}
+
 /* ================= NAV ================= */
 .nav{
   position:fixed; top:0; left:0; right:0; z-index:120;
@@ -266,20 +292,26 @@ button{font-family:inherit;}
   background:linear-gradient(125deg, rgba(255,255,255,0.22) 0%, transparent 30%);
   opacity:0.8;
 }
-/* morphing blob glow, tinted per-tile via --tab */
+/* morphing blob glow, tinted per-tile via --tab.
+   NOTE: this animates transform only (translate/scale/rotate) rather than
+   border-radius — border-radius keyframes force a repaint every frame,
+   and doing that on a blurred layer across every tile at once was the
+   main cause of the sluggish feel. Transform is compositor-only, so this
+   stays smooth even with 20+ tiles animating at the same time. */
 .tile::before{
   content:""; position:absolute; z-index:-1;
   width:130%; height:130%; top:-30%; left:-25%;
   background:var(--tab, var(--gold));
   opacity:0.16; filter:blur(34px);
   border-radius:42% 58% 63% 37% / 41% 46% 54% 59%;
-  animation:blobWobble 12s ease-in-out infinite;
+  animation:blobDrift 13s ease-in-out infinite;
   transition:opacity .35s ease;
+  will-change:transform;
 }
-@keyframes blobWobble{
-  0%,100%{border-radius:42% 58% 63% 37% / 41% 46% 54% 59%;}
-  34%{border-radius:57% 43% 38% 62% / 55% 40% 60% 45%;}
-  67%{border-radius:37% 63% 55% 45% / 48% 62% 38% 52%;}
+@keyframes blobDrift{
+  0%,100%{transform:translate(0,0) scale(1) rotate(0deg);}
+  33%{transform:translate(4%,-5%) scale(1.1) rotate(6deg);}
+  66%{transform:translate(-5%,4%) scale(0.92) rotate(-5deg);}
 }
 .tile:hover, .tile:focus-visible{
   transform:translateY(-7px) scale(1.015);
@@ -395,13 +427,13 @@ button{font-family:inherit;}
 
 .post-links{display:flex; flex-wrap:wrap; gap:10px;}
 .post-link{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:9px 18px; font-size:0.88rem; border-radius:var(--r-pill);
+  display:inline-flex; align-items:center; gap:9px;
+  padding:10px 20px; font-size:0.88rem; font-weight:500; border-radius:var(--r-pill);
   background:var(--glass-fill); border:1px solid var(--glass-border); color:var(--teal);
-  transition:border-color .25s ease, transform .25s ease, background .25s ease;
+  transition:border-color .25s ease, transform .25s ease, background .25s ease, box-shadow .25s ease;
 }
-.post-link:hover{border-color:var(--teal); background:var(--glass-fill-hover); transform:translateY(-2px);}
-.post-link svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.6;}
+.post-link:hover{border-color:var(--teal); background:var(--glass-fill-hover); transform:translateY(-2px); box-shadow:0 10px 24px rgba(70,199,179,0.18);}
+.post-link svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.6; flex:none;}
 
 /* ================= LIGHTBOX ================= */
 .lightbox{
@@ -413,6 +445,11 @@ button{font-family:inherit;}
 .lightbox-stage{max-width:min(920px,92vw); max-height:88vh;}
 .lightbox-stage img, .lightbox-stage video{max-width:100%; max-height:88vh; display:block; margin:0 auto; border-radius:var(--r-md); box-shadow:var(--glass-shadow);}
 .lightbox-stage audio{width:min(480px,88vw);}
+.lightbox-original{
+  display:block; text-align:center; margin-top:14px;
+  font-size:0.85rem; color:var(--teal); text-decoration:underline; text-underline-offset:3px;
+}
+.lightbox-original:hover{color:var(--gold);}
 .lightbox-close{
   position:absolute; top:24px; right:24px; width:44px; height:44px; border-radius:50%;
   background:var(--glass-fill); border:1px solid var(--glass-border); color:var(--parchment);
