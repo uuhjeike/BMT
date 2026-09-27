@@ -307,7 +307,11 @@ async function loadTeachers(){
       </a>`;
     }).join("");
   }catch(err){
-    grid.innerHTML = `<p class="section-note">uuhjeike/BMT রিপোর রুটে teachers.txt আপলোড করো — ফরম্যাট: নাম | বিষয় | নম্বর | Sir/Madam</p>`;
+    grid.innerHTML = `<a class="tile tile-ghost" href="https://github.com/uuhjeike/BMT/edit/main/teachers.txt" target="_blank" rel="noopener">
+      <div class="folder-icon">${icon("users")}</div>
+      <div class="folder-name">এখানে স্যার/ম্যাডামের নম্বর দেখাবে</div>
+      <div class="folder-meta"><span>uuhjeike/BMT রিপোর teachers.txt-এ লিখো — নাম | বিষয় | নম্বর | Sir/Madam</span></div>
+    </a>`;
   }
 }
 
@@ -341,7 +345,11 @@ async function loadSocial(){
       </a>`;
     }).join("");
   }catch(err){
-    row.innerHTML = `<p class="section-note">uuhjeike/BMT রিপোর রুটে social.txt আপলোড করো — ফরম্যাট: নাম | URL</p>`;
+    row.innerHTML = `<a class="tile tile-ghost" href="https://github.com/uuhjeike/BMT/edit/main/social.txt" target="_blank" rel="noopener">
+      <div class="folder-icon">${icon("link")}</div>
+      <div class="folder-name">এখানে গ্রুপ/পেজের লিংক দেখাবে</div>
+      <div class="folder-meta"><span>uuhjeike/BMT রিপোর social.txt-এ লিখো — নাম | URL</span></div>
+    </a>`;
   }
 }
 
