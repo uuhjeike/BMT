@@ -143,10 +143,14 @@ function parseFlexibleDate(str){
 }
 
 /* Newest first. Posts with a real DATE: are ordered by that date;
-   posts with no date fall after the dated ones, in reverse file
-   order (so the most recently *added* undated post still floats
-   to the top of that group). Used for every feed — subjects and
-   social alike. */
+   posts with no date fall after the dated ones, ordered by file
+   position — since new posts are added at the TOP of the file, the
+   post with the lowest index (i) is the most recently added, so it
+   needs to sort first within that group. (This was previously
+   backwards — b.i - a.i — which put the most recently added
+   undated post LAST instead of first; that was the bug where a new
+   post kept appearing to sit under the old one.) Used for every
+   feed — subjects and social alike. */
 function sortPostsLatestFirst(posts){
   return posts
     .map((post, i) => ({ post, i, ts: parseFlexibleDate(post.date) }))
@@ -154,7 +158,7 @@ function sortPostsLatestFirst(posts){
       if(a.ts != null && b.ts != null) return b.ts - a.ts;
       if(a.ts != null) return -1;
       if(b.ts != null) return 1;
-      return b.i - a.i;
+      return a.i - b.i;
     })
     .map(x => x.post);
 }
