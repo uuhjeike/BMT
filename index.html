@@ -7,7 +7,7 @@
 <meta name="description" content="সব বিষয়ের হোমওয়ার্ক, ক্লাসওয়ার্ক ও নোট একসাথে — BMT, বন্ধুদের সাথে শেয়ার করার জন্য একটি স্টাডি হাব।">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -46,7 +46,7 @@
 <!-- ===== NAV ===== -->
 <nav class="nav" id="nav">
   <a href="#top" class="nav-mark">
-    <span class="nav-mark-ink">BM</span><span class="nav-mark-gold">T</span>
+    <img class="nav-logo" src="https://raw.githubusercontent.com/uuhjeike/BMT/main/Files/file_00000000d2d88211b941082128f72c6f.png" alt="BMT — Business Management Technology">
   </a>
   <div class="nav-links">
     <a href="#subjects">বিষয়সমূহ</a>
@@ -62,7 +62,11 @@
     <span></span><span></span><span></span><span></span><span></span>
   </div>
   <div class="hero-inner">
-    <p class="hero-eyebrow">BMT · প্রথম বর্ষ · ব্যবসায় শিক্ষা</p>
+    <div class="hero-crest">
+      <img src="https://raw.githubusercontent.com/uuhjeike/BMT/main/Files/file_00000000d2d88211b941082128f72c6f.png" alt="BMT — Business Management Technology" loading="eager">
+    </div>
+    <p class="hero-motto">Learn · Build · Grow</p>
+    <p class="hero-eyebrow">প্রথম বর্ষ · ব্যবসায় শিক্ষা</p>
     <h1 class="hero-title">
       <span class="line" id="heroLine1">সব পড়া,</span>
       <span class="line" id="heroLine2">এক জায়গায়।</span>
@@ -123,16 +127,14 @@
 <!-- ===== SUBJECT FEED PANEL ===== -->
 <div class="feed-overlay" id="feedOverlay">
   <div class="feed-panel" id="feedPanel" role="dialog" aria-modal="true" aria-labelledby="feedTitle">
-    <div class="feed-header">
-      <div class="feed-header-text">
+    <button class="feed-close" id="feedClose" aria-label="বন্ধ করো">
+      <svg viewBox="0 0 24 24"><path d="M5 5 L19 19 M19 5 L5 19"/></svg>
+    </button>
+    <div class="feed-body" id="feedBody">
+      <div class="feed-header-inline">
         <p class="feed-kicker" id="feedKicker">বিষয়</p>
         <h2 id="feedTitle">—</h2>
       </div>
-      <button class="feed-close" id="feedClose" aria-label="বন্ধ করো">
-        <svg viewBox="0 0 24 24"><path d="M5 5 L19 19 M19 5 L5 19"/></svg>
-      </button>
-    </div>
-    <div class="feed-body" id="feedBody">
       <div class="feed-loading" id="feedLoading">লোড হচ্ছে…</div>
       <div class="feed-posts" id="feedPosts"></div>
       <div class="feed-empty" id="feedEmpty" hidden>এখনো কোনো পোস্ট নেই। প্রথম হোমওয়ার্কটা এখানেই যোগ হবে।</div>
