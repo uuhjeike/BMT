@@ -1,16 +1,7 @@
 /* =========================================================
-   STUDY HUB — script.js  (performance build)
-   Everything content-related is read from plain .txt files in the
-   GitHub repo. To add a subject: add an entry to SUBJECTS below and
-   upload its matching "<subject name>.txt" file. The post rules are
-   UNCHANGED — every post sits between "-" lines.
+   STUDY HUB — script.js  (performance build with photostack & virtual windowing)
    ========================================================= */
 
-/* Content lives in Alpha's GitHub repo (uuhjeike/BMT, branch main), one
-   file per subject, named EXACTLY after the subject (Bangla name + ".txt"),
-   sitting at the repo ROOT — not inside a /data folder. Fetched straight
-   from raw.githubusercontent.com so the site works even opened as a local
-   file. To point this at a different repo, change GITHUB_RAW_BASE below. */
 const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/uuhjeike/BMT/main/";
 
 const SUBJECTS = [
@@ -58,13 +49,6 @@ const ICONS = {
 
 function icon(name){ return `<svg viewBox="0 0 24 24">${ICONS[name]||ICONS.link}</svg>`; }
 
-/* ---------------------------------------------------------
-   URL HELPERS
-   - resolveUrl(): a normal github.com "blob" page link is silently
-     rewritten to the raw file link so the browser can load it.
-   - youTubeEmbedUrl(): youtube.com/youtu.be link -> embeddable URL.
-   - platformInfo(): Bangla label + icon for a bare link by domain.
---------------------------------------------------------- */
 function resolveUrl(url){
   const m = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^?#]+?)\/?(\?.*)?$/i);
   if(m){
@@ -92,27 +76,16 @@ function youTubeEmbedUrl(url){
 function platformInfo(url){
   let host = "";
   try{ host = new URL(url).hostname.replace(/^www\./,""); }catch(e){}
-  if(/youtube\.com$|youtu\.be$/.test(host)) return { label:"ইউটিউব", icon:"youtube" };
-  if(/facebook\.com$|fb\.watch$/.test(host)) return { label:"ফেসবুক", icon:"facebook" };
+  if(/youtube\.com$\vert{}youtu\.be$/.test(host)) return { label:"ইউটিউব", icon:"youtube" };
+  if(/facebook\.com$\vert{}fb\.watch$/.test(host)) return { label:"ফেসবুক", icon:"facebook" };
   if(/instagram\.com$/.test(host)) return { label:"ইনস্টাগ্রাম", icon:"instagram" };
   if(/tiktok\.com$/.test(host)) return { label:"টিকটক", icon:"tiktok" };
-  if(/t\.me$|telegram\.org$/.test(host)) return { label:"টেলিগ্রাম", icon:"chat" };
-  if(/wa\.me$|whatsapp\.com$/.test(host)) return { label:"হোয়াটসঅ্যাপ", icon:"whatsapp" };
+  if(/t\.me$\vert{}telegram\.org$/.test(host)) return { label:"টেলিগ্রাম", icon:"chat" };
+  if(/wa\.me$\vert{}whatsapp\.com$/.test(host)) return { label:"হোয়াটসঅ্যাপ", icon:"whatsapp" };
   if(/drive\.google\.com$/.test(host)) return { label:"ড্রাইভ ফাইল", icon:"drive" };
   return { label:"লিংক", icon:"link" };
 }
 
-/* ---------------------------------------------------------
-   PHOTO RESIZER — the real cause of the heavy feel.
-   Phone photos are ~13 megapixels / ~3 MB each. Showing one as a small
-   thumbnail still forces the phone to download and decode all 13 MP
-   (~50 MB of RAM per photo). So the FEED asks a free image service
-   (wsrv.nl) for a 1200px-wide copy instead — about 100 KB, ~8 MB RAM.
-   Safe by design: if the service is slow (9 s), blocked or down, the
-   site automatically falls back to the original photo, exactly as before.
-   The popup and the "original quality" link ALWAYS use the untouched
-   original file. To switch this off completely: PHOTO_RESIZER = false.
---------------------------------------------------------- */
 const PHOTO_RESIZER = true;
 const THUMB_WIDTH = 1200;
 function thumbUrl(src){
@@ -124,8 +97,6 @@ const IMG_EXT_RE = /\.(jpe?g|png|gif|webp|avif|bmp)(\?.*)?$/i;
 const VID_EXT_RE = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
 const AUD_EXT_RE = /\.(mp3|wav|m4a|aac|flac|ogg)(\?.*)?$/i;
 
-/* A bare link line (no DATE:/IMG:/etc. tag in front of it) is
-   auto-classified instead of being dropped into plain text. */
 function classifyBareUrl(post, rawUrl){
   const url = resolveUrl(rawUrl.trim());
   const yt = youTubeEmbedUrl(url);
@@ -137,8 +108,6 @@ function classifyBareUrl(post, rawUrl){
   post.links.push({ url, label: info.label, kind: info.icon });
 }
 
-/* Parses "15 Jan 2026" style dates (and simple Bangla-numeral /
-   Bangla-month variants) into a sortable timestamp, or null. */
 const BN_MONTHS = { "জানুয়ারি":0,"ফেব্রুয়ারি":1,"মার্চ":2,"এপ্রিল":3,"মে":4,"জুন":5,"জুলাই":6,"আগস্ট":7,"সেপ্টেম্বর":8,"অক্টোবর":9,"নভেম্বর":10,"ডিসেম্বর":11 };
 function parseFlexibleDate(str){
   if(!str) return null;
@@ -152,10 +121,6 @@ function parseFlexibleDate(str){
   return isNaN(d.getTime()) ? null : d.getTime();
 }
 
-/* Newest first. Posts with a real DATE: are ordered by that date; posts
-   with no date fall after the dated ones, ordered by file position —
-   new posts are added at the TOP of the file, so the lowest index is the
-   most recently added and sorts first. Used for every feed. */
 function sortPostsLatestFirst(posts){
   return posts
     .map((post, i) => ({ post, i, ts: parseFlexibleDate(post.date) }))
@@ -168,33 +133,6 @@ function sortPostsLatestFirst(posts){
     .map(x => x.post);
 }
 
-
-/* ---------------------------------------------------------
-   POST TEXT-FILE PARSER  (rules unchanged)
-   Each post sits between "-" lines, the familiar way:
-       -
-       DATE: ...
-       post content...
-       -
-       DATE: ...
-       next post...
-       -
-   A "-" line just marks a boundary, so it works whether a post has
-   one on both sides, only before, only after, or several in a row —
-   any stretch of text between two "-" lines (or the start/end of the
-   file) becomes one post.
-   Lines starting with "#" are comments and ignored.
-   Recognised tags (case-insensitive), one per line:
-     DATE: 15 Jan 2026
-     IMG:  https://...              (repeatable -> photos)
-     VID:  https://...              (repeatable -> videos, or a YouTube link -> embedded player)
-     AUD:  https://...              (repeatable -> audio track)
-     DRIVE: https://... (লেবেল)     (repeatable -> drive button)
-     LINK:  https://... (লেবেল)     (repeatable -> link button)
-   A bare link with no tag in front of it is auto-detected too. A normal
-   github.com/.../blob/... link is rewritten to the working raw-file link.
-   Any other line is treated as post text.
---------------------------------------------------------- */
 function parsePosts(raw){
   const rawLines = raw.split("\n");
   const blocks = [];
@@ -255,18 +193,12 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
-/* ---------------------------------------------------------
-   POST RENDERING
-   Photos/videos are rendered as EMPTY boxes first (no src). A single
-   IntersectionObserver (below) gives each one its real src only when it
-   is about to scroll into view. That is what stops the feed from
-   downloading and decoding every original photo at the same moment.
---------------------------------------------------------- */
-function mediaThumbHtml(kind, src, index){
+function mediaThumbHtml(kind, src, index, total){
   const s = escapeHtml(src);
   if(kind === "img"){
     return `<div class="media-thumb is-img" data-kind="img" data-src="${s}" role="button" tabindex="0" aria-label="ছবি ${index+1} বড় করে দেখো">
       <img alt="" decoding="async">
+      <span class="photostack-badge">${index + 1} / ${total}</span>
     </div>`;
   }
   return `<div class="media-thumb is-vid" data-kind="vid" data-src="${s}" role="button" tabindex="0" aria-label="ভিডিও চালাও">
@@ -275,8 +207,6 @@ function mediaThumbHtml(kind, src, index){
   </div>`;
 }
 
-/* YouTube: a light click-to-play cover instead of loading a full player
-   (about 1 MB of scripts each) for every embedded video in the feed. */
 function embedHtml(e){
   const id = (e.embedUrl.split("/embed/")[1] || "").replace(/[^\w-]/g, "");
   const cover = id ? `<img src="https://i.ytimg.com/vi/${escapeHtml(id)}/hqdefault.jpg" alt="" decoding="async" loading="lazy">` : "";
@@ -291,9 +221,12 @@ function renderPost(post){
     ...post.images.map(src=>({kind:"img",src})),
     ...post.videos.map(src=>({kind:"vid",src})),
   ];
+  
+  const totalImgs = post.images.length;
   const mediaHtml = media.length
-    ? `<div class="post-media">${media.map((m,i)=>mediaThumbHtml(m.kind,m.src,i)).join("")}</div>`
+    ? `<div class="post-media ${totalImgs > 1 ? 'photostack-group' : ''}">${media.map((m,i)=>mediaThumbHtml(m.kind, m.src, i, totalImgs)).join("")}</div>`
     : "";
+    
   const embedsHtml = (post.embeds||[]).map(embedHtml).join("");
   const audioHtml = post.audios.map(src=>`
     <div class="post-audio" data-src="${escapeHtml(src)}" role="button" tabindex="0">
@@ -306,6 +239,7 @@ function renderPost(post){
           ${icon(l.kind)}${escapeHtml(l.label)}
         </a>`).join("")}</div>`
     : "";
+    
   return `<article class="post">
     ${post.date ? `<p class="post-date">${escapeHtml(post.date)}</p>` : ""}
     ${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ""}
@@ -313,19 +247,14 @@ function renderPost(post){
     ${embedsHtml}
     ${audioHtml}
     ${linksHtml}
-  </article>`;
+  </article><div class="post-divider"><span>✦ BMT ✦</span></div>`;
 }
 
-/* ---------------------------------------------------------
-   LAZY MEDIA — load a photo/video only when it is near the screen,
-   then size its box to the file's REAL proportions so nothing is cropped.
---------------------------------------------------------- */
 let mediaObserver = null;
 
 function sizeThumbToMedia(thumb, w, h){
   if(!w || !h) return;
   thumb.style.aspectRatio = w + " / " + h;
-  /* never blow a small photo up beyond its real width */
   if(thumb.dataset.kind === "img") thumb.style.maxWidth = w + "px";
 }
 
@@ -338,7 +267,6 @@ function loadThumbMedia(thumb){
     const fast = thumbUrl(src);
     let usedOriginal = (fast === src);
     let timer = 0;
-    /* resized copy failed / too slow -> switch to the original photo */
     const useOriginal = () => {
       if(usedOriginal) return false;
       usedOriginal = true;
@@ -360,7 +288,6 @@ function loadThumbMedia(thumb){
   } else {
     media.addEventListener("loadedmetadata", () => sizeThumbToMedia(thumb, media.videoWidth, media.videoHeight), { once:true });
     media.addEventListener("error", () => thumb.classList.add("failed"), { once:true });
-    /* "#t=0.1" makes the browser paint the first frame as the cover */
     media.src = src + "#t=0.1";
   }
 }
@@ -383,9 +310,6 @@ function observeMedia(scope, rootEl){
   thumbs.forEach(t => mediaObserver.observe(t));
 }
 
-/* ---------------------------------------------------------
-   SHELF (subject folder-cards)
---------------------------------------------------------- */
 const shelf = document.getElementById("shelf");
 const postCache = {};
 
@@ -408,9 +332,6 @@ SUBJECTS.forEach((s, i) => {
   shelf.appendChild(card);
 });
 
-/* ---------------------------------------------------------
-   FEED PANEL
---------------------------------------------------------- */
 const feedOverlay = document.getElementById("feedOverlay");
 const feedTitle = document.getElementById("feedTitle");
 const feedKicker = document.getElementById("feedKicker");
@@ -419,14 +340,48 @@ const feedLoading = document.getElementById("feedLoading");
 const feedEmpty = document.getElementById("feedEmpty");
 const feedBody = document.getElementById("feedBody");
 
-/* Each open gets a ticket number. If someone opens subject A, closes it
-   and opens subject B before A finished loading, A's late answer is
-   ignored instead of overwriting B's posts. */
 let feedToken = 0;
 
-/* Shared by every feed source (subjects + social): opens the sliding
-   panel, shows loading/empty states, renders posts. `loader` is an async
-   function returning a posts[] array (or throwing a message to show). */
+/* Virtualized windowing parameters */
+let currentPostsAll = [];
+const CHUNK_SIZE = 6;
+let renderedCount = 0;
+
+function renderChunk(postsToRender) {
+  const htmlFragment = postsToRender.map(renderPost).join("");
+  feedPosts.insertAdjacentHTML('beforeend', htmlFragment);
+  observeMedia(feedPosts, feedBody);
+}
+
+function handleFeedScroll() {
+  if (!feedBody) return;
+  const scrollTop = feedBody.scrollTop;
+  const scrollHeight = feedBody.scrollHeight;
+  const clientHeight = feedBody.clientHeight;
+
+  // Load more down
+  if (scrollTop + clientHeight >= scrollHeight - 300) {
+    if (renderedCount < currentPostsAll.length) {
+      const nextBatch = currentPostsAll.slice(renderedCount, renderedCount + CHUNK_SIZE);
+      renderedCount += nextBatch.length;
+      renderChunk(nextBatch);
+    }
+  }
+
+  // Memory management: remove items far up if too many rendered
+  const articles = feedPosts.querySelectorAll('article.post');
+  if (articles.length > 12 && scrollTop > 1500) {
+    for (let i = 0; i < articles.length - 8; i++) {
+      const art = articles[i];
+      const div = art.nextElementSibling;
+      if (div && div.classList.contains('post-divider')) div.remove();
+      art.remove();
+    }
+  }
+}
+
+feedBody.addEventListener('scroll', handleFeedScroll);
+
 async function openFeed({kicker, title, emptyText, loader}){
   const token = ++feedToken;
   feedKicker.textContent = kicker;
@@ -437,19 +392,22 @@ async function openFeed({kicker, title, emptyText, loader}){
   feedOverlay.classList.add("open");
   document.body.style.overflow = "hidden";
   feedBody.scrollTop = 0;
+  renderedCount = 0;
+  currentPostsAll = [];
 
   try{
     const loaded = await loader();
     if(token !== feedToken) return;
-    const posts = sortPostsLatestFirst(loaded);
+    currentPostsAll = sortPostsLatestFirst(loaded);
     feedLoading.hidden = true;
-    if(!posts.length){
+    if(!currentPostsAll.length){
       feedEmpty.hidden = false;
       feedEmpty.textContent = emptyText || "এখনো কোনো পোস্ট নেই। প্রথম হোমওয়ার্কটা এখানেই যোগ হবে।";
       return;
     }
-    feedPosts.innerHTML = posts.map(renderPost).join("");
-    observeMedia(feedPosts, feedBody);
+    const initialBatch = currentPostsAll.slice(0, CHUNK_SIZE);
+    renderedCount = initialBatch.length;
+    renderChunk(initialBatch);
   }catch(err){
     if(token !== feedToken) return;
     feedLoading.hidden = true;
@@ -480,22 +438,17 @@ function openSubject(subject){
   });
 }
 
-/* ---------------------------------------------------------
-   SOCIAL FEED — social.txt uses the exact same post syntax as a
-   subject file (DATE / IMG / VID / AUD / LINK, blocks separated by "-"
-   lines). Clicking "যোগাযোগ" in the nav opens it as its own feed panel.
---------------------------------------------------------- */
 let socialCache = null;
 
 function openSocialFeed(){
   openFeed({
     kicker: "যোগাযোগ",
     title: "সবার সাথে যুক্ত থাকো",
-    emptyText: "GitHub রিপোতে এখনো social.txt পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"social.txt\" আপলোড করো (বিষয়ের ফাইলের মতোই DATE/LINK ফরম্যাটে)।",
+    emptyText: "GitHub রিপোতে এখনো social.txt পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"social.txt\" আপলোড করো।",
     async loader(){
       if(!socialCache){
         const res = await fetch(SOCIAL_FILE, {cache:"no-store"});
-        if(!res.ok) throw new Error("GitHub রিপোতে এখনো social.txt পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"social.txt\" আপলোড করো (বিষয়ের ফাইলের মতোই DATE/LINK ফরম্যাটে)।");
+        if(!res.ok) throw new Error("GitHub রিপোতে এখনো social.txt পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"social.txt\" আপলোড করো।");
         const raw = await res.text();
         socialCache = parsePosts(raw);
       }
@@ -506,21 +459,15 @@ function openSocialFeed(){
 document.getElementById("navSocial").addEventListener("click", openSocialFeed);
 
 function closeFeed(){
-  feedToken++;                      /* cancel any load still in flight */
+  feedToken++;
   if(mediaObserver){ mediaObserver.disconnect(); mediaObserver = null; }
   feedOverlay.classList.remove("open");
   document.body.style.overflow = "";
-  /* stop any playing YouTube cover-swapped iframe / media by clearing the feed */
   setTimeout(() => { if(!feedOverlay.classList.contains("open")) feedPosts.innerHTML = ""; }, 350);
 }
 document.getElementById("feedClose").addEventListener("click", closeFeed);
 feedOverlay.addEventListener("click", e => { if(e.target === feedOverlay) closeFeed(); });
 
-/* ---------------------------------------------------------
-   LIGHTBOX — click-to-expand for photo, video, audio
-   Photo: fitted whole on screen (original proportions), with a link to
-   open the untouched original file in a new tab.
---------------------------------------------------------- */
 const lightbox = document.getElementById("lightbox");
 const lightboxStage = document.getElementById("lightboxStage");
 
@@ -529,8 +476,6 @@ function openLightbox(kind, src, preview){
   const s = escapeHtml(src);
   const token = ++lightboxToken;
   if(kind === "img"){
-    /* `preview` = the copy already loaded in the feed: it appears
-       instantly, then the untouched original replaces it in place. */
     const first = (preview && preview !== src) ? preview : src;
     lightboxStage.innerHTML = `
       <img src="${escapeHtml(first)}" alt="" decoding="async">
@@ -539,7 +484,7 @@ function openLightbox(kind, src, preview){
     let triedOriginal = (first === src);
     im.addEventListener("error", () => {
       if(token !== lightboxToken) return;
-      if(!triedOriginal){ triedOriginal = true; im.src = src; return; }   /* preview broke -> try original */
+      if(!triedOriginal){ triedOriginal = true; im.src = src; return; }
       im.outerHTML = `<p class="lightbox-msg">ছবিটা লোড করা যায়নি।</p>`;
     });
     if(first !== src){
@@ -574,8 +519,6 @@ document.addEventListener("keydown", e => {
   else if(feedOverlay.classList.contains("open")) closeFeed();
 });
 
-/* One delegated listener for everything clickable inside the feed —
-   photos, videos, audio, YouTube covers. Survives every re-render. */
 function playEmbed(el){
   const url = el.dataset.embed;
   if(!url) return;
@@ -584,6 +527,7 @@ function playEmbed(el){
   el.removeAttribute("tabindex");
   el.innerHTML = `<iframe src="${escapeHtml(url)}?autoplay=1&rel=0&playsinline=1" title="ভিডিও" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 }
+
 feedPosts.addEventListener("click", e => {
   const thumb = e.target.closest(".media-thumb");
   if(thumb){
@@ -597,6 +541,7 @@ feedPosts.addEventListener("click", e => {
   const emb = e.target.closest(".post-embed[data-embed]");
   if(emb){ playEmbed(emb); }
 });
+
 feedPosts.addEventListener("keydown", e => {
   if(e.key !== "Enter" && e.key !== " ") return;
   const t = e.target;
@@ -606,17 +551,9 @@ feedPosts.addEventListener("keydown", e => {
   }
 });
 
-/* ---------------------------------------------------------
-   TEACHERS — teachers.txt lines: Name | Subject | Phone | Sir/Madam
-   The card is one call link; the call / WhatsApp buttons are siblings,
-   never nested inside another link (nested links are invalid HTML and
-   the browser tears the card apart when it parses them).
---------------------------------------------------------- */
 const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
 function bnToEn(str){ return str.replace(/[০-৯]/g, d => BN_DIGITS.indexOf(d)); }
 
-/* Accepts both:  Name | Subject | Phone | Sir/Madam
-   and the simple: Name - 01712345678   (phone found anywhere in the line) */
 function parseTeacherRow(row){
   if(row.includes("|")){
     const [name="", subject="", phone="", role=""] = row.split("|").map(p=>p.trim());
@@ -627,8 +564,6 @@ function parseTeacherRow(row){
   const phone = pm ? pm[0].trim() : "";
   const name = (pm ? flat.replace(pm[0], "") : row)
     .replace(/[\s\-–—:,;|()]+$/, "").replace(/^[\s\-–—:,;|]+/, "").trim();
-  /* keep Bangla letters of the name from the ORIGINAL row (digits were only
-     converted for finding the number) */
   const origName = pm ? row.slice(0, flat.indexOf(pm[0])).replace(/[\s\-–—:,;|()]+$/, "").trim() : name;
   return { name: origName || name, subject:"", phone, role:"" };
 }
@@ -677,12 +612,7 @@ async function loadTeachers(){
 
 loadTeachers();
 
-/* ---------------------------------------------------------
-   UNSTOPPABLE — stopwatch counting up since 24 September 2026
-   (local time). Days/Hours/Minutes/Seconds, updates every second,
-   and only touches the page when a number actually changed.
---------------------------------------------------------- */
-const UNSTOPPABLE_START = new Date(2026, 8, 24, 0, 0, 0); // month is 0-indexed: 8 = September
+const UNSTOPPABLE_START = new Date(2026, 8, 24, 0, 0, 0);
 const pDays = document.getElementById("pDays");
 const pHours = document.getElementById("pHours");
 const pMins = document.getElementById("pMins");

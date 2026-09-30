@@ -1,17 +1,5 @@
 /* =========================================================
-   BMT — CREST  (performance build)
-   Same dark stone + engraved gold look, but every GPU-heavy
-   effect is gone: no backdrop-filter, no blurred/animated
-   layers, no blend-mode grain, no particles. What is left is
-   plain paint (gradients, borders, small static shadows) that
-   scrolls as one flat page — smooth even on a cheap phone.
-
-   ink:       #0A0908  base canvas
-   parchment: #F5F1E6  primary text
-   muted:     #A19A8C  secondary text
-   gold:      engraved gold
-   teal:      cool steel/silver accent
-   rust:      deep bronze accent
+   BMT — CREST  (performance build with photostack & stylish dividers)
    ========================================================= */
 
 :root{
@@ -49,7 +37,6 @@ body{
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
   position:relative;
-  /* static warm light — plain gradients painted with the page, no fixed layer */
   background:
     radial-gradient(900px 520px at 50% 0, rgba(228,185,104,0.10), transparent 70%),
     radial-gradient(700px 600px at 100% 900px, rgba(169,113,30,0.08), transparent 70%),
@@ -93,7 +80,7 @@ img{max-width:100%;}
 }
 .nav-btn:hover, .nav-btn:focus-visible{color:var(--gold);}
 
-/* ================= UNSTOPPABLE — stopwatch banner, very bottom of the page ================= */
+/* ================= UNSTOPPABLE ================= */
 .unstoppable{
   position:relative;
   padding:80px 24px 100px;
@@ -138,7 +125,6 @@ img{max-width:100%;}
   position:relative; display:inline-block;
   margin-bottom:20px;
 }
-/* static glow behind the crest — a plain gradient, replaces the old animated drop-shadow */
 .hero-crest::before{
   content:""; position:absolute; inset:-45%; z-index:0; pointer-events:none;
   background:radial-gradient(circle, rgba(228,185,104,0.24), transparent 62%);
@@ -187,10 +173,7 @@ img{max-width:100%;}
 .section-head h2{font-size:clamp(1.8rem,4vw,2.6rem); margin-bottom:10px;}
 .section-note{color:var(--muted); font-size:0.98rem;}
 
-/* ================= TILES — subject folders + teacher cards =================
-   Flat frosted-look cards: translucent fill, gold hairline, a static
-   tinted glow and a static sheen. No blur, no animation, no per-tile
-   compositor layer — dozens of tiles cost almost nothing to scroll. */
+/* ================= TILES ================= */
 .shelf, .teacher-grid{
   max-width:1180px; margin:0 auto;
   display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:20px;
@@ -230,8 +213,6 @@ img{max-width:100%;}
 .folder-meta{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:0.82rem; color:var(--muted); position:relative; z-index:1;}
 .folder-count{color:var(--tab, var(--gold)); white-space:nowrap;}
 
-/* teacher tile: the whole card is one call link (stretched), the call /
-   WhatsApp buttons sit above it — no nested <a> tags any more */
 .tile-main{display:block;}
 a.tile-main::after{content:""; position:absolute; inset:0; z-index:2; border-radius:inherit;}
 .tile-actions{display:flex; gap:8px; margin-top:14px; position:relative; z-index:3;}
@@ -262,9 +243,7 @@ a.tile-main::after{content:""; position:absolute; inset:0; z-index:2; border-rad
   border-top:1px solid rgba(255,255,255,0.08);
 }
 
-/* ================= FEED OVERLAY / PANEL =================
-   Solid panel, plain dim backdrop. `visibility:hidden` while closed so
-   the browser does zero work for it until it is opened. */
+/* ================= FEED PANEL ================= */
 .feed-overlay{
   position:fixed; inset:0; z-index:300;
   background:rgba(4,5,7,0.72);
@@ -306,18 +285,25 @@ a.tile-main::after{content:""; position:absolute; inset:0; z-index:2; border-rad
 .feed-loading, .feed-empty{color:var(--muted); font-style:italic; font-family:'Cormorant Garamond',serif; font-size:1.1rem; padding:40px 0; text-align:center;}
 
 .post{
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  padding:26px 0;
+  padding:10px 0;
 }
-.post:first-child{padding-top:0;}
 .post-date{font-size:0.82rem; color:var(--gold); margin-bottom:8px; letter-spacing:0.02em;}
 .post-text{white-space:pre-line; overflow-wrap:anywhere; font-size:1rem; color:var(--parchment); margin-bottom:14px;}
 
-/* ---- photos & videos: shown WHOLE, never cropped ----
-   The box starts as a 4:3 placeholder; the moment the file's real size is
-   known, script.js sets the box to that exact ratio (and never enlarges a
-   small photo past its real width). object-fit:contain guarantees the full
-   picture is visible. Tap = full-screen popup. */
+/* ================= PHOTOSTACK & POST DIVIDERS ================= */
+.photostack-group {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(228, 185, 104, 0.2);
+  border-radius: var(--r-md);
+  padding: 12px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+}
+.photostack-group .media-thumb + .media-thumb {
+  margin-top: 12px;
+  border-top: 1px dashed rgba(228, 185, 104, 0.25);
+  padding-top: 12px;
+}
+
 .post-media{margin-bottom:12px;}
 .media-thumb{
   position:relative; display:block; width:100%; margin:0 auto;
@@ -331,6 +317,20 @@ a.tile-main::after{content:""; position:absolute; inset:0; z-index:2; border-rad
   display:block; width:100%; height:100%; object-fit:contain;
   font-size:0; color:transparent;
 }
+.photostack-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(10, 9, 8, 0.85);
+  border: 1px solid var(--glass-border);
+  color: var(--gold);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
 .media-thumb.failed::after{
   content:"লোড করা যায়নি — ট্যাপ করে খুলো";
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center;
@@ -339,6 +339,31 @@ a.tile-main::after{content:""; position:absolute; inset:0; z-index:2; border-rad
 .media-thumb:focus-visible, .post-audio:focus-visible, .post-embed:focus-visible{outline:2px solid var(--gold); outline-offset:3px;}
 .media-play{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(7,9,13,0.28); pointer-events:none;}
 .media-play svg{width:34px; height:34px; fill:var(--parchment); opacity:0.92;}
+
+/* Custom divider bar between posts matching theme */
+.post-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0;
+  position: relative;
+  text-align: center;
+}
+.post-divider::before, .post-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(228, 185, 104, 0.35), transparent);
+}
+.post-divider span {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  padding: 0 16px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
 
 .post-embed{
   position:relative; width:100%; aspect-ratio:16/9; margin-bottom:12px;
@@ -368,9 +393,7 @@ a.tile-main::after{content:""; position:absolute; inset:0; z-index:2; border-rad
 .post-link:hover{border-color:var(--teal); background:var(--glass-fill-hover);}
 .post-link svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.6; flex:none;}
 
-/* ================= LIGHTBOX — the photo popup =================
-   Fits the whole picture on screen (up to 96% of width, full height),
-   original proportions kept. The "original quality" link is under it. */
+/* ================= LIGHTBOX ================= */
 .lightbox{
   position:fixed; inset:0; z-index:500; background:rgba(2,3,5,0.98);
   display:flex; align-items:center; justify-content:center;
