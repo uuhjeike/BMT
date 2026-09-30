@@ -1,2727 +1,1312 @@
 BMT — Business Management Technology
 
-«A lightweight, file-driven study hub for Business Management Technology students.»
+«BMT stands for Business Management Technology.»
+
+BMT is a web-based educational and study-support project created to organize Business Management Technology learning materials in a simple, clean, accessible, and easy-to-use way.
+
+The main purpose of this project is simple:
+
+Put the important study resources in one organized place so a student can find what they need without searching through many different files, websites, or messages.
 
 🌐 Live Website:
 https://uuhjeike.github.io/BMT/
 
-📦 Source Repository:
-https://github.com/uuhjeike/BMT
+---
+
+📚 Table of Contents
+
+- "1. About BMT" (#1-about-bmt)
+- "2. What Does BMT Mean?" (#2-what-does-bmt-mean)
+- "3. Why This Project Exists" (#3-why-this-project-exists)
+- "4. Main Idea" (#4-main-idea)
+- "5. How BMT Works" (#5-how-bmt-works)
+- "6. How a Student Uses BMT" (#6-how-a-student-uses-bmt)
+- "7. Website Structure" (#7-website-structure)
+- "8. Subject System" (#8-subject-system)
+- "9. Learning Material System" (#9-learning-material-system)
+- "10. Notes System" (#10-notes-system)
+- "11. Text-File Content System" (#11-text-file-content-system)
+- "12. Website Interface" (#12-website-interface)
+- "13. Responsive Design" (#13-responsive-design)
+- "14. Performance" (#14-performance)
+- "15. Accessibility" (#15-accessibility)
+- "16. Technology" (#16-technology)
+- "17. Project Architecture" (#17-project-architecture)
+- "18. File Responsibilities" (#18-file-responsibilities)
+- "19. How Content Is Loaded" (#19-how-content-is-loaded)
+- "20. How to Add New Content" (#20-how-to-add-new-content)
+- "21. How to Update Existing Content" (#21-how-to-update-existing-content)
+- "22. How to Add a New Subject" (#22-how-to-add-a-new-subject)
+- "23. How to Add Notes" (#23-how-to-add-notes)
+- "24. How to Add Links" (#24-how-to-add-links)
+- "25. How to Maintain the Project" (#25-how-to-maintain-the-project)
+- "26. GitHub Repository" (#26-github-repository)
+- "27. GitHub Pages" (#27-github-pages)
+- "28. Deployment" (#28-deployment)
+- "29. Updating the Website" (#29-updating-the-website)
+- "30. Beginner Explanation" (#30-beginner-explanation)
+- "31. Simple Example" (#31-simple-example)
+- "32. Project Workflow" (#32-project-workflow)
+- "33. Design Principles" (#33-design-principles)
+- "34. Reliability" (#34-reliability)
+- "35. Limitations" (#35-limitations)
+- "36. Future Improvements" (#36-future-improvements)
+- "37. Development Guidelines" (#37-development-guidelines)
+- "38. Contribution" (#38-contribution)
+- "39. Credits" (#39-credits)
+- "40. License" (#40-license)
+- "41. Final Summary" (#41-final-summary)
 
 ---
 
-📖 Table of Contents
+1. About BMT
 
-1. "What Is BMT?" (#-what-is-bmt)
-2. "The One-Sentence Explanation" (#-the-one-sentence-explanation)
-3. "BMT Explained Like a 5-Year-Old" (#-bmt-explained-like-a-5-year-old)
-4. "How the Entire System Works" (#-how-the-entire-system-works)
-5. "Architecture" (#-architecture)
-6. "Complete Project Structure" (#-complete-project-structure)
-7. "What Every File Does" (#-what-every-file-does)
-8. "The Most Important Rule" (#-the-most-important-rule)
-9. "How "index.html" Works" (#-how-indexhtml-works)
-10. "How "style.css" Works" (#-how-stylecss-works)
-11. "How "script.js" Works" (#-how-scriptjs-works)
-12. "How the Data Folder Works" (#-how-the-data-folder-works)
-13. "How Subjects Work" (#-how-subjects-work)
-14. "Current Subjects" (#-current-subjects)
-15. "How Subject Files Are Connected" (#-how-subject-files-are-connected)
-16. "How the Browser Finds a Subject File" (#-how-the-browser-finds-a-subject-file)
-17. "The Post System" (#-the-post-system)
-18. "The "-" Separator" (#-the--separator)
-19. "How a Post Is Parsed" (#-how-a-post-is-parsed)
-20. "Post Text" (#-post-text)
-21. "Dates" (#-dates)
-22. "Images" (#-images)
-23. "Videos" (#-videos)
-24. "Audio" (#-audio)
-25. "Links" (#-links)
-26. "Google Drive Links" (#-google-drive-links)
-27. "Multiple Media Items" (#-multiple-media-items)
-28. "Comments" (#-comments)
-29. "Lightbox" (#-lightbox)
-30. "Post Caching" (#-post-caching)
-31. "Subject Post Counter" (#-subject-post-counter)
-32. "Teacher System" (#-teacher-system)
-33. "Teacher File Format" (#-teacher-file-format)
-34. "Phone Buttons" (#-phone-buttons)
-35. "WhatsApp Buttons" (#-whatsapp-buttons)
-36. "Social System" (#-social-system)
-37. "Social File Format" (#-social-file-format)
-38. "Icons" (#-icons)
-39. "Error Handling" (#-error-handling)
-40. "What Happens When a File Is Missing" (#-what-happens-when-a-file-is-missing)
-41. "GitHub Pages" (#-github-pages)
-42. "Local Development" (#-local-development)
-43. "Why "file://" Can Be a Problem" (#-why-file-can-be-a-problem)
-44. "Adding a New Subject" (#-adding-a-new-subject)
-45. "Renaming a Subject" (#-renaming-a-subject)
-46. "Removing a Subject" (#-removing-a-subject)
-47. "Adding Homework" (#-adding-homework)
-48. "Adding Notes" (#-adding-notes)
-49. "Adding Classwork" (#-adding-classwork)
-50. "Adding Images to a Post" (#-adding-images-to-a-post)
-51. "Adding Videos to a Post" (#-adding-videos-to-a-post)
-52. "Adding Audio to a Post" (#-adding-audio-to-a-post)
-53. "Adding Buttons" (#-adding-buttons)
-54. "Adding Teachers" (#-adding-teachers)
-55. "Adding Social Links" (#-adding-social-links)
-56. "Unicode and Bangla Filename Rules" (#-unicode-and-bangla-filename-rules)
-57. "What You Should Never Do" (#-what-you-should-never-do)
-58. "Common Mistakes" (#-common-mistakes)
-59. "Troubleshooting" (#-troubleshooting)
-60. "Performance" (#-performance)
-61. "Security" (#-security)
-62. "Content vs Code" (#-content-vs-code)
-63. "Source of Truth" (#-source-of-truth)
-64. "Safe Maintenance" (#-safe-maintenance)
-65. "Testing Checklist" (#-testing-checklist)
-66. "Complete Examples" (#-complete-examples)
-67. "Developer Reference" (#-developer-reference)
-68. "Future Expansion" (#-future-expansion)
-69. "Limitations" (#-limitations)
-70. "Final Mental Model" (#-final-mental-model)
+BMT — Business Management Technology is a lightweight educational website designed to make study materials easier to access and organize.
+
+Instead of keeping every learning resource separately, BMT provides a central web interface where students can navigate through subjects and access the corresponding educational materials.
+
+The project is designed around a simple philosophy:
+
+«Keep the interface simple. Keep the content organized. Make updates easy.»
+
+BMT is not intended to be complicated software.
+
+It is designed to behave more like a digital study bookshelf.
+
+Imagine having a bookshelf.
+
+The bookshelf has:
+
+- different sections;
+- different books;
+- different chapters;
+- different notes.
+
+BMT does something similar digitally.
+
+The website acts as the bookshelf.
+
+Subjects act as the sections.
+
+Learning materials act as the books.
+
+Notes act as additional study pages.
 
 ---
 
-🎓 What Is BMT?
+2. What Does BMT Mean?
 
-BMT means:
+BMT
+
+B = Business
+
+M = Management
+
+T = Technology
+
+Together:
 
 «Business Management Technology»
 
-This project is a lightweight study website designed to keep important academic information in one organized place.
-
-The website can display:
-
-- subjects
-- homework
-- classwork
-- notes
-- dates
-- images
-- videos
-- audio
-- external links
-- Google Drive links
-- teacher information
-- phone actions
-- WhatsApp actions
-- social/group links
-
-The important design decision is that normal academic content is stored separately from the website code.
-
-That means the website code can stay the same while the study content changes.
+The project is designed around the educational context of Business Management Technology and provides a digital location for related study resources.
 
 ---
 
-🧠 The One-Sentence Explanation
+3. Why This Project Exists
 
-The entire BMT system can be explained in one sentence:
+Students often have learning materials in many different places.
 
-«The browser loads the website code, JavaScript reads the appropriate ".txt" files from the "data/" folder, converts their simple text instructions into website elements, and displays them to the student.»
+For example:
 
----
+- phone storage;
+- messaging applications;
+- cloud storage;
+- browser bookmarks;
+- social-media messages;
+- separate documents;
+- text files;
+- websites;
+- PDF files;
+- video links.
 
-🧸 BMT Explained Like a 5-Year-Old
+When everything is separated, finding something later can become difficult.
 
-Imagine you have a big school cupboard.
+BMT solves this organizational problem by creating a central interface.
 
-Inside the cupboard there are different folders:
+Instead of thinking:
 
-📁 বাংলা
-📁 English
-📁 Computer
-📁 Accounting
-📁 Economics
-📁 Marketing
-...
+«"Where did I save that?"»
 
-Each folder contains a notebook.
+the student can think:
 
-The notebooks are actually ".txt" files.
-
-You write:
-
-Today's homework:
-Read chapter 5.
-
-The website opens that notebook.
-
-It reads what you wrote.
-
-Then it shows the information beautifully on the screen.
-
-So the process is:
-
-👨‍🎓 You
-   │
-   │ write information
-   ▼
-📄 TXT FILE
-   │
-   │ stored in
-   ▼
-🐙 GitHub
-   │
-   │ browser downloads it
-   ▼
-🧠 JavaScript
-   │
-   │ understands the text
-   ▼
-🌐 BMT WEBSITE
-   │
-   ▼
-👨‍🎓 Student sees the information
-
-That is BMT.
+«"I will open BMT."»
 
 ---
 
-🔥 How the Entire System Works
+4. Main Idea
 
-The complete process is:
+The entire project can be understood using one simple structure:
 
-1. Browser opens BMT
-        ↓
-2. index.html creates the page structure
-        ↓
-3. style.css gives the page its appearance
-        ↓
-4. script.js starts running
-        ↓
-5. JavaScript reads the configured subjects
-        ↓
-6. JavaScript creates the subject cards
-        ↓
-7. JavaScript waits for the student to select a subject
-        ↓
-8. Student clicks a subject
-        ↓
-9. JavaScript determines that subject's TXT filename
-        ↓
-10. fetch() requests that TXT file
-        ↓
-11. Browser receives plain text
-        ↓
-12. parsePosts() reads the text
-        ↓
-13. '-' lines divide the file into posts
-        ↓
-14. DATE / IMG / VID / AUD / DRIVE / LINK are detected
-        ↓
-15. Normal text becomes post text
-        ↓
-16. JavaScript creates HTML for the post
-        ↓
-17. The post appears inside the feed
-        ↓
-18. Media receives click behavior
-        ↓
-19. Clicking media opens the lightbox
-        ↓
-20. Student reads or watches the content
+BMT
+│
+├── Subjects
+│   ├── Subject 1
+│   ├── Subject 2
+│   ├── Subject 3
+│   └── More subjects
+│
+├── Learning Materials
+│   ├── Reading material
+│   ├── References
+│   ├── Resources
+│   └── External links
+│
+└── Notes
+    ├── Subject-specific notes
+    ├── Important information
+    └── Additional study material
+
+The important idea is organization.
+
+Everything belongs somewhere.
 
 ---
 
-🏗️ Architecture
+5. How BMT Works
 
-BMT has four major layers.
+At a very simple level, the website works like this:
 
-┌─────────────────────────────────────┐
-│            CONTENT LAYER            │
-│                                     │
-│   data/*.txt                        │
-│   Homework / notes / teachers       │
-│   social links / media URLs         │
-└─────────────────┬───────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│            LOGIC LAYER              │
-│                                     │
-│   script.js                         │
-│   Loading / parsing / rendering     │
-└─────────────────┬───────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│            STRUCTURE LAYER          │
-│                                     │
-│   index.html                        │
-│   Page structure / containers       │
-└─────────────────┬───────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│            DESIGN LAYER             │
-│                                     │
-│   style.css                         │
-│   Colors / spacing / layout         │
-└─────────────────────────────────────┘
+Student
+   ↓
+Opens BMT
+   ↓
+Chooses a subject
+   ↓
+Chooses a resource
+   ↓
+Reads / opens the material
+   ↓
+Returns to BMT
+   ↓
+Chooses another subject or resource
+
+The website provides the navigation.
+
+The content provides the learning material.
 
 ---
 
-📁 Complete Project Structure
+6. How a Student Uses BMT
 
-The project uses this general structure:
+A student does not need to understand programming to use BMT.
+
+The normal process is:
+
+Step 1 — Open the website
+
+Open:
+
+https://uuhjeike.github.io/BMT/
+
+Step 2 — Look at the available subjects
+
+The website presents the available study areas.
+
+Step 3 — Choose a subject
+
+Select the subject that the student wants to study.
+
+Step 4 — Choose the required material
+
+Open the relevant resource.
+
+Step 5 — Study
+
+Read the material, open the linked resource, or use the provided learning content.
+
+Step 6 — Use notes when necessary
+
+Subject-specific notes can be used for additional information.
+
+---
+
+7. Website Structure
+
+The project follows a simple separation between:
+
+Structure
++
+Design
++
+Behavior
++
+Content
+
+These concepts are important.
+
+HTML
+
+HTML defines what exists on the page.
+
+For example:
+
+- headings;
+- buttons;
+- sections;
+- links;
+- containers;
+- navigation elements.
+
+Think of HTML as the skeleton of the website.
+
+---
+
+CSS
+
+CSS controls how the website looks.
+
+For example:
+
+- spacing;
+- typography;
+- layout;
+- borders;
+- backgrounds;
+- responsiveness;
+- visual appearance.
+
+Think of CSS as the clothes and appearance of the website.
+
+---
+
+JavaScript
+
+JavaScript controls interactive behavior.
+
+For example:
+
+- opening sections;
+- loading content;
+- changing interface states;
+- responding to user actions;
+- handling dynamic content.
+
+Think of JavaScript as the brain that makes the interface respond.
+
+---
+
+Text Files
+
+Text files can contain content that the website displays or uses.
+
+This allows content to be separated from the main interface code.
+
+That is useful because content can be updated without unnecessarily rewriting the entire website.
+
+---
+
+8. Subject System
+
+Subjects are one of the most important parts of BMT.
+
+Each subject should have a clearly identifiable location in the interface.
+
+For example:
+
+BMT
+│
+├── বাংলা
+├── ইংরেজি
+├── কম্পিউটার অফিস অ্যাপ্লিকেশন
+└── Other subjects
+
+The exact subjects should always match the actual repository.
+
+The important principle is:
+
+«One subject should remain clearly separated from another subject.»
+
+This prevents the website from becoming one large, confusing collection of information.
+
+---
+
+9. Learning Material System
+
+Learning materials are the actual resources that students use.
+
+A resource may be:
+
+- a text file;
+- a document;
+- an external webpage;
+- an educational reference;
+- a video;
+- another supported resource.
+
+The website should make it obvious what a resource is and where it leads.
+
+A good resource system answers three questions:
+
+1. What is this?
+2. Which subject does it belong to?
+3. Where does it take me?
+
+---
+
+10. Notes System
+
+Notes are separate from the main subject navigation.
+
+The purpose of notes is to allow additional information to be kept with the relevant subject.
+
+For example:
+
+Subject A
+│
+├── Main materials
+│
+└── Notes
+    ├── Note 1
+    ├── Note 2
+    └── Note 3
+
+This is better than putting every note from every subject into one giant page.
+
+Why?
+
+Because when a student studies one subject, they should be able to see the information related to that subject without searching through unrelated material.
+
+---
+
+11. Text-File Content System
+
+One important design principle of BMT is keeping content manageable.
+
+A text-file-based system can make maintenance easier.
+
+For example:
+
+content/
+├── subject-a.txt
+├── subject-b.txt
+├── subject-c.txt
+└── notes/
+    ├── subject-a.txt
+    ├── subject-b.txt
+    └── subject-c.txt
+
+The exact directory structure must follow the actual repository.
+
+The concept, however, is simple:
+
+«Code controls the website. Content files control the information.»
+
+This separation makes future updates easier.
+
+---
+
+12. Website Interface
+
+The interface should prioritize:
+
+- clarity;
+- readability;
+- easy navigation;
+- fast interaction;
+- mobile compatibility;
+- minimal unnecessary complexity.
+
+A student should not need a programming manual to understand the website.
+
+A good interface should make the next action obvious.
+
+---
+
+13. Responsive Design
+
+BMT is intended to be useful on different screen sizes.
+
+That includes:
+
+- smartphones;
+- tablets;
+- laptops;
+- desktop computers.
+
+A responsive website changes its layout according to the available screen space.
+
+For example:
+
+Large screen
+┌─────────────────────────────┐
+│ Subject │ Subject │ Subject │
+└─────────────────────────────┘
+
+Small screen
+┌───────────────┐
+│ Subject       │
+├───────────────┤
+│ Subject       │
+├───────────────┤
+│ Subject       │
+└───────────────┘
+
+The exact appearance depends on the implementation.
+
+The important goal is that the content remains usable.
+
+---
+
+14. Performance
+
+BMT is intentionally designed as a lightweight website.
+
+A lightweight website is useful because students may access it using:
+
+- mobile data;
+- older phones;
+- slower connections;
+- limited hardware.
+
+Performance principles include:
+
+- avoid unnecessary libraries;
+- avoid unnecessarily large assets;
+- keep JavaScript focused;
+- keep CSS organized;
+- avoid unnecessary animations;
+- load only what is required;
+- keep content easy to retrieve.
+
+The goal is:
+
+«Do useful work without wasting resources.»
+
+---
+
+15. Accessibility
+
+A useful educational website should be understandable to as many users as reasonably possible.
+
+Important accessibility principles include:
+
+- readable text;
+- sufficient spacing;
+- recognizable buttons;
+- clear navigation;
+- meaningful link labels;
+- keyboard-friendly interaction where applicable;
+- avoiding information that depends only on color;
+- sensible heading structure.
+
+Accessibility is not just a technical feature.
+
+It is about making the website easier for humans to use.
+
+---
+
+16. Technology
+
+The project is designed as a web project.
+
+The primary technologies should be documented according to the actual repository.
+
+Typical responsibilities are:
+
+Technology| Responsibility
+HTML| Page structure
+CSS| Visual design
+JavaScript| Interaction and dynamic behavior
+TXT / content files| Educational content
+GitHub| Source-code hosting
+GitHub Pages| Website hosting
+
+Only technologies actually used by the project should be added to this table.
+
+Do not list a framework simply because it is popular.
+
+---
+
+17. Project Architecture
+
+The basic architecture can be understood like this:
+
+                 ┌─────────────────┐
+                 │     Student     │
+                 └────────┬────────┘
+                          │
+                          ▼
+                 ┌─────────────────┐
+                 │   Web Browser   │
+                 └────────┬────────┘
+                          │
+                          ▼
+                 ┌─────────────────┐
+                 │    BMT Website  │
+                 └────────┬────────┘
+                          │
+              ┌───────────┼───────────┐
+              ▼           ▼           ▼
+           HTML          CSS      JavaScript
+              │           │           │
+              └───────────┼───────────┘
+                          │
+                          ▼
+                  Content / Resources
+
+The browser displays the website.
+
+HTML provides the structure.
+
+CSS provides the appearance.
+
+JavaScript provides behavior.
+
+Content files provide information where the implementation uses them.
+
+---
+
+18. File Responsibilities
+
+Every file in a project should have a reason for existing.
+
+A typical structure may look like:
 
 BMT/
 │
 ├── index.html
 ├── style.css
 ├── script.js
-├── README.md
 │
-└── data/
-    │
-    ├── বাংলা-১.txt
-    ├── ইংরেজি-১.txt
-    ├── কম্পিউটার অফিস অ্যাপ্লিকেশন-১.txt
-    ├── ব্যবসায় গণিত ও পরিসংখ্যান.txt
-    ├── হিসাববিজ্ঞান নীতি ও প্রয়োগ-১.txt
-    ├── অর্থনীতি ও বাণিজ্যিক ভূগোল.txt
-    ├── ব্যবসায় সংগঠন ও ব্যবস্থাপনা-১.txt
-    ├── মার্কেটিং নীতি ও প্রয়োগ-১.txt
-    ├── ডিজিটাল টেকনোলজি ইন বিজনেস-১.txt
-    ├── হিউম্যান রিসোর্স ম্যানেজমেন্ট-১.txt
-    │
-    ├── teachers.txt
-    └── social.txt
+├── subject files
+│
+├── notes
+│
+├── assets
+│
+└── README.md
 
-The current JavaScript explicitly constructs subject files under "data/" and uses "data/teachers.txt" and "data/social.txt".
-
----
-
-📄 What Every File Does
+The exact file list must always match the repository.
 
 "index.html"
 
-This is the structure of the website.
+Usually responsible for the main webpage structure.
 
-Think:
+It may contain:
 
-«Skeleton»
-
-It contains the main HTML elements that JavaScript later uses.
-
-It is not where normal homework should be written.
+- the main interface;
+- navigation;
+- subject areas;
+- buttons;
+- containers;
+- links.
 
 ---
 
 "style.css"
 
-This is the appearance of the website.
+Usually responsible for visual presentation.
 
-Think:
+It may control:
 
-«Clothes»
-
-It controls things such as:
-
-- layout
-- spacing
-- colors
-- cards
-- folders
-- buttons
-- typography
-- responsive appearance
-- visual effects
+- layout;
+- spacing;
+- fonts;
+- buttons;
+- responsive behavior;
+- colors;
+- borders;
+- visual states.
 
 ---
 
 "script.js"
 
-This is the brain.
+Usually responsible for behavior.
 
-Think:
+It may control:
 
-«The teacher who reads the notebooks and puts everything in the correct place.»
+- dynamic content;
+- event handling;
+- navigation;
+- file loading;
+- interface updates.
 
-It contains the subject configuration, file loading, parsing, rendering, teacher loading, social loading, media behavior, and lightbox behavior.
+---
+
+Content Files
+
+Content files contain information used by the website.
+
+Keeping content separate can make future editing easier.
 
 ---
 
 "README.md"
 
-This is the instruction manual.
+This file explains the project.
 
-It explains how the project works.
+It is documentation for:
 
-It does not control the website.
-
-Changing README text normally does not change website behavior.
-
----
-
-"data/*.txt"
-
-These are the content files.
-
-They contain the actual study information.
-
-This is where normal content should live.
+- students;
+- teachers;
+- developers;
+- future maintainers;
+- anyone visiting the repository.
 
 ---
 
-🚨 The Most Important Rule
+19. How Content Is Loaded
 
-Remember this:
+If the website uses external text files, the basic idea is:
 
-«Content goes into ".txt" files. Code goes into ".html", ".css", and ".js" files.»
+Website starts
+      ↓
+JavaScript knows which content is required
+      ↓
+Browser requests the content file
+      ↓
+Content file is read
+      ↓
+Website receives the text
+      ↓
+Text is placed into the appropriate section
+      ↓
+Student sees the content
 
-Do not put ordinary homework inside "script.js".
+This allows the website's content to be changed independently from much of the interface.
 
-Do not put ordinary homework inside "style.css".
-
-Do not put ordinary homework inside "index.html".
-
-Instead:
-
-Homework
-   ↓
-Correct subject .txt file
-
----
-
-🧱 How "index.html" Works
-
-The HTML provides the places where information will appear.
-
-For example, JavaScript expects certain page elements to exist.
-
-The JavaScript then finds those elements with:
-
-document.getElementById(...)
-
-and inserts content into them.
-
-This means HTML and JavaScript are connected.
-
-If you rename or remove an element that JavaScript expects, functionality can break.
-
-Therefore:
-
-«Do not randomly rename HTML IDs unless you also update the JavaScript that uses them.»
+The exact mechanism depends on the implementation.
 
 ---
 
-🎨 How "style.css" Works
+20. How to Add New Content
 
-CSS does not decide what homework exists.
+The safest approach is:
 
-CSS decides how existing information looks.
+1. Identify where the content belongs
 
-For example:
+Ask:
 
-JavaScript:
-"This is a subject."
+«Which subject does this belong to?»
 
-CSS:
-"Make that subject look like a beautiful folder card."
+2. Use the appropriate content file
 
-Therefore:
+Do not put unrelated content into another subject's file.
 
-Content problem
-→ check TXT / JavaScript
+3. Follow the existing format
 
-Visual problem
-→ check CSS
+If existing files follow a particular format, keep the same format.
 
----
+4. Save the file
 
-🧠 How "script.js" Works
+Make sure the filename is correct.
 
-The JavaScript can be divided conceptually into several systems:
+5. Commit the change
 
-1. Subject configuration
-2. Icon definitions
-3. Post parser
-4. HTML rendering
-5. Subject cards
-6. Subject feed
-7. Media handling
-8. Lightbox
-9. Teacher loader
-10. Social loader
+Save the update to GitHub.
 
-The actual implementation defines these systems in one JavaScript file.
+6. Check the website
+
+Open the live website and verify that the new content appears correctly.
 
 ---
 
-📚 How Subjects Work
+21. How to Update Existing Content
 
-Subjects are defined in:
+To update existing material:
 
-const SUBJECTS = [...]
+Find the correct file
+        ↓
+Open the file
+        ↓
+Find the old information
+        ↓
+Change only what is necessary
+        ↓
+Save
+        ↓
+Commit / push
+        ↓
+Check the live website
 
-The current implementation contains ten subjects.
-
-Each subject has three important properties:
-
-{
-  name: "...",
-  tab: "...",
-  icon: "..."
-}
-
-"name"
-
-The actual subject name.
-
-Example:
-
-বাংলা-১
-
-"tab"
-
-Controls the configured visual tab style.
-
-Current values include:
-
-gold
-teal
-rust
-
-"icon"
-
-Selects an icon from the "ICONS" object.
+Always verify the result after updating.
 
 ---
 
-📚 Current Subjects
+22. How to Add a New Subject
 
-The current JavaScript configuration contains:
-
-1. বাংলা-১
-2. ইংরেজি-১
-3. কম্পিউটার অফিস অ্যাপ্লিকেশন-১
-4. ব্যবসায় গণিত ও পরিসংখ্যান
-5. হিসাববিজ্ঞান নীতি ও প্রয়োগ-১
-6. অর্থনীতি ও বাণিজ্যিক ভূগোল
-7. ব্যবসায় সংগঠন ও ব্যবস্থাপনা-১
-8. মার্কেটিং নীতি ও প্রয়োগ-১
-9. ডিজিটাল টেকনোলজি ইন বিজনেস-১
-10. হিউম্যান রিসোর্স ম্যানেজমেন্ট-১
-
-These are defined directly in "script.js".
-
----
-
-🔗 How a Subject Connects to Its TXT File
-
-This is extremely important.
-
-The code automatically creates:
-
-s.file = `data/${encodeURIComponent(s.name)}.txt`;
-
-So if:
-
-name = বাংলা-১
-
-the expected file is:
-
-data/বাংলা-১.txt
-
-If:
-
-name = ইংরেজি-১
-
-the expected file is:
-
-data/ইংরেজি-১.txt
-
-There is no separate English slug system in the current implementation. The subject name itself is used as the basis of the filename.
-
----
-
-🌐 Why "encodeURIComponent()" Is Used
-
-Bangla filenames contain Unicode characters.
-
-They can also contain:
-
-- spaces
-- punctuation
-- special characters
-
-A browser URL cannot safely send every character exactly as typed.
-
-So JavaScript uses:
-
-encodeURIComponent(...)
-
-before requesting the file.
-
-This converts the filename into a URL-safe representation.
-
-You should therefore not manually create a strange encoded filename.
-
-Keep the real repository filename readable:
-
-data/বাংলা-১.txt
-
-JavaScript handles URL encoding.
-
----
-
-📥 How a Subject Is Loaded
-
-When the user clicks a subject:
-
-User clicks subject
-       ↓
-openSubject(subject)
-       ↓
-Check cache
-       ↓
-If not cached:
-       ↓
-fetch(subject.file)
-       ↓
-Read response text
-       ↓
-parsePosts(raw)
-       ↓
-Store posts
-       ↓
-Render posts
-       ↓
-Show feed
-
-The implementation uses "fetch()" and "response.text()" to retrieve the plain-text file.
-
----
-
-📝 The Post System
-
-The subject ".txt" files are not arbitrary text.
-
-They use a simple mini-format.
-
-The website understands several special commands.
-
-The main commands are:
-
-DATE:
-IMG:
-VID:
-AUD:
-DRIVE:
-LINK:
-
-Everything else becomes normal post text.
-
----
-
-➖ The "-" Separator
-
-The character:
-
--
-
-on its own line is a post boundary.
-
-Example:
-
--
-আজকের হোমওয়ার্ক
--
-
-means:
-
-POST 1
-
-Another:
-
--
-আগামীকালের ক্লাস
--
-
-means:
-
-POST 2
-
-The parser reads the file line-by-line and uses standalone "-" lines to divide the content into blocks.
-
----
-
-🧩 Multiple Posts
-
-Example:
-
--
-আজকের বাংলা হোমওয়ার্ক।
--
-
--
-আগামীকাল পরীক্ষা।
--
-
--
-পরবর্তী অধ্যায় পড়তে হবে।
--
-
-The website sees three posts.
-
----
-
-⚠️ The Separator Must Be Alone
-
-Correct:
-
--
-
-Incorrect:
-
-- আজকের কাজ
-
-Incorrect:
-
---- 
-
-Incorrect:
-
-some text -
-
-The parser specifically checks whether:
-
-line.trim() === "-"
-
-So only a line whose trimmed content is exactly "-" acts as a boundary.
-
----
-
-🧠 How the Parser Thinks
-
-Imagine this file:
-
--
-DATE: ১ অক্টোবর ২০২৬
-আজকের হোমওয়ার্ক।
-IMG: https://example.com/a.jpg
--
-
--
-DATE: ৩০ সেপ্টেম্বর ২০২৬
-আগের ক্লাস।
--
-
-The parser first creates blocks.
+Adding a subject should follow the project's existing architecture.
 
 Conceptually:
 
-BLOCK 1
-DATE...
-TEXT...
-IMG...
+New Subject
+     ↓
+Create / update subject content
+     ↓
+Add subject to navigation
+     ↓
+Add required resources
+     ↓
+Add notes location if required
+     ↓
+Test
+     ↓
+Publish
 
-BLOCK 2
-DATE...
-TEXT...
+Do not create random filenames or structures.
 
-Then each block is inspected line-by-line.
-
----
-
-🔍 Recognized Commands
-
-The parser recognizes:
-
-Command| Meaning
-"DATE:"| Post date
-"IMG:"| Image
-"VID:"| Video
-"AUD:"| Audio
-"DRIVE:"| Drive link
-"LINK:"| Normal link
-
-The matching is case-insensitive because the parser uses an "i" flag.
-
-So:
-
-DATE:
-date:
-Date:
-DaTe:
-
-can be recognized as the same command.
+Follow the naming style already used by the repository.
 
 ---
 
-📝 Post Text
+23. How to Add Notes
 
-Any line that is not one of the recognized commands becomes text.
-
-Example:
-
--
-আজকের গুরুত্বপূর্ণ ঘোষণা।
-
-আগামীকাল সবাই সময়মতো আসবে।
--
-
-Both sentences become the post's text.
-
----
-
-📅 Dates
-
-Use:
-
-DATE:
-
-Example:
-
-DATE: ১ অক্টোবর ২০২৬
-
-The date is stored separately from the normal post text.
-
-The website then displays it above the post text.
-
----
-
-⚠️ Important Date Fact
-
-The current parser extracts and displays the date, but the actual "script.js" shown here does not implement a date-sorting algorithm.
-
-Therefore, do not document BMT as automatically sorting posts newest-to-oldest unless that behavior is actually added to the current JavaScript.
-
-The order of rendered posts currently follows the order produced by "parsePosts()", which follows the order of blocks in the text file.
-
-Therefore:
-
-If you want newest first, keep the newest post first in the ".txt" file.
-
-Example:
-
--
-DATE: ১ অক্টোবর ২০২৬
-Newest
--
-
--
-DATE: ৩০ সেপ্টেম্বর ২০২৬
-Older
--
-
--
-DATE: ২৯ সেপ্টেম্বর ২০২৬
-Oldest
--
-
----
-
-🖼️ Images
-
-Use:
-
-IMG: URL
-
-Example:
-
-IMG: https://example.com/photo.jpg
-
-The image is stored in the post's:
-
-images
-
-array.
-
-Multiple images are supported.
-
----
-
-🖼️ Multiple Images
-
-Example:
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-আজকের ক্লাসের ছবি:
-
-IMG: https://example.com/photo1.jpg
-IMG: https://example.com/photo2.jpg
-IMG: https://example.com/photo3.jpg
--
-
-The parser adds each image to the same post.
-
-The renderer then creates a media grid.
-
----
-
-🎥 Videos
-
-Use:
-
-VID: URL
-
-Example:
-
-VID: https://example.com/video.mp4
-
-Multiple videos are supported because every "VID:" line is pushed into the video's array.
-
----
-
-🎵 Audio
-
-Use:
-
-AUD: URL
-
-Example:
-
-AUD: https://example.com/audio.mp3
-
-The audio item appears as a clickable audio element in the post.
-
-Clicking it opens the audio in the lightbox system.
-
----
-
-🔗 Normal Links
-
-Use:
-
-LINK: URL
-
-Example:
-
-LINK: https://example.com
-
-This creates a clickable link button.
-
----
-
-🏷️ Custom Link Labels
-
-You can give the link a label:
-
-LINK: https://example.com (Open Study Material)
-
-The parser separates:
-
-URL
-
-from:
-
-(label)
-
-So the button displays:
-
-Open Study Material
-
-instead of displaying the full URL as the button text.
-
-The same label mechanism works for "DRIVE:".
-
----
-
-📁 Google Drive Links
-
-Use:
-
-DRIVE: URL
-
-Example:
-
-DRIVE: https://drive.google.com/example
-
-Or:
-
-DRIVE: https://drive.google.com/example (Class PDF)
-
-The website gives Drive links a Drive-specific icon.
-
----
-
-🖼️ + 🎥 + 🎵 + 🔗 Everything in One Post
-
-A post can contain multiple types simultaneously.
-
-Example:
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-আজকের গুরুত্বপূর্ণ ক্লাস।
-
-এটি একটি গুরুত্বপূর্ণ অধ্যায়।
-
-IMG: https://example.com/photo1.jpg
-IMG: https://example.com/photo2.jpg
-
-VID: https://example.com/video.mp4
-
-AUD: https://example.com/audio.mp3
-
-DRIVE: https://drive.google.com/example (PDF)
-
-LINK: https://example.com (More Information)
--
-
-The parser separates these into:
-
-date
-text
-images
-videos
-audios
-links
-
-and the renderer displays each type separately.
-
----
-
-💬 Comments
-
-Lines beginning with:
-
-#
-
-are ignored.
-
-Example:
-
-# This is a private developer note.
-
-The website does not treat that line as visible post content.
-
-This is useful for leaving internal notes inside content files.
-
----
-
-🔦 Lightbox
-
-When media is clicked, BMT can open it in a larger overlay.
-
-The current implementation supports:
-
-Image
-Video
-Audio
-
-The lightbox creates the appropriate HTML element.
-
-Image
-
-<img>
-
-Video
-
-<video controls autoplay>
-
-Audio
-
-<audio controls autoplay>
-
-The implementation also supports closing the lightbox by:
-
-- clicking the close button
-- clicking the overlay
-- pressing "Escape"
-
----
-
-💾 Post Caching
-
-BMT keeps already-loaded posts in:
-
-const postCache = {};
-
-When a subject is opened:
-
-First open
-    ↓
-Fetch TXT
-    ↓
-Parse TXT
-    ↓
-Store posts in cache
-
-If the same subject is opened again during the page session:
-
-Open subject
-    ↓
-Check cache
-    ↓
-Already exists
-    ↓
-Use cached posts
-
-This prevents repeatedly parsing the same file during the same page session.
-
----
-
-🔢 Subject Post Counter
-
-Each subject card receives a counter element.
-
-After the subject's file is loaded, the code can display:
-
-10 পোস্ট
-
-if ten posts were parsed.
-
-This count represents the number of valid parsed post blocks, not the number of lines in the file.
-
----
-
-👨‍🏫 Teacher System
-
-Teacher information comes from:
-
-data/teachers.txt
-
-JavaScript loads this file separately.
-
-It does not require you to manually create each teacher card in HTML.
-
----
-
-📋 Teacher File Format
-
-Each line follows:
-
-Name | Subject | Phone | Role
-
-Example:
-
-Md Example | Accounting | 01700000000 | Sir
-
-The four parts mean:
-
-Part 1 → Teacher name
-Part 2 → Subject
-Part 3 → Phone number
-Part 4 → Role
-
-The current implementation splits each row using:
-
-|
-
----
-
-👨‍🏫 Teacher Example
-
-Md Rahman | English | 01712345678 | Sir
-
-The website can display:
-
-Sir
-Md Rahman
-English
-
-and, when a number exists:
-
-📞 Call
-💬 WhatsApp
-
----
-
-📞 Phone Buttons
-
-If a teacher has a phone number, the website generates a "tel:" link.
-
-Example:
-
-01712345678
-
-becomes a phone action.
-
-On a compatible phone, tapping it can open the phone application.
-
----
-
-💬 WhatsApp Buttons
-
-The code converts the supplied number into a WhatsApp-compatible international number.
-
-For example, a Bangladesh-style number:
-
-01712345678
-
-is converted conceptually into:
-
-8801712345678
-
-and used with:
-
-https://wa.me/
-
-The implementation performs this conversion inside "waLink()".
-
----
-
-📢 Social System
-
-Social/group/page links come from:
-
-data/social.txt
-
-Each non-empty line is treated as one item.
-
----
-
-📋 Social File Format
-
-Use:
-
-Label | URL
-
-Example:
-
-BMT WhatsApp Group | https://chat.whatsapp.com/example
-
-Another:
-
-Facebook Group | https://facebook.com/example
-
-The website converts each line into a clickable social chip.
-
----
-
-🧹 Blank Lines
-
-Blank lines in:
-
-teachers.txt
-social.txt
-
-are ignored.
-
----
-
-💬 Comments in Teacher and Social Files
-
-Lines beginning with:
-
-#
-
-are ignored there too.
-
-Example:
-
-# This teacher is no longer active.
-
----
-
-🎨 Icons
-
-The project contains an internal SVG icon system.
-
-Available configured icons include:
-
-book
-language
-computer
-calculator
-coins
-globe
-briefcase
-megaphone
-chip
-users
-link
-drive
-phone
-chat
-play
-
-The function:
-
-icon(name)
-
-returns the SVG markup for the requested icon.
-
-If an unknown icon name is requested, the implementation falls back to the link icon.
-
----
-
-🛡️ HTML Escaping
-
-The project includes:
-
-escapeHtml()
-
-This protects rendered text and URLs from being inserted directly as raw HTML.
-
-Characters such as:
-
-&
-<
->
-"
-'
-
-are escaped before being inserted into generated markup.
-
-This is an important safety layer when rendering external text.
-
----
-
-⚠️ What Happens When a Subject File Is Missing?
-
-When the student opens a subject, the website tries:
-
-fetch(subject.file)
-
-If the request fails, the feed does not simply crash.
-
-Instead, the UI displays a message indicating that the subject file is not currently available and tells the user where the expected file should exist.
-
-The implementation handles this inside "openSubject()".
-
----
-
-⚠️ What Happens When Teacher Data Is Missing?
-
-If:
-
-data/teachers.txt
-
-cannot be loaded or contains no usable rows, the teacher section displays an explanatory message telling the user to add teacher information using the expected format.
-
----
-
-⚠️ What Happens When Social Data Is Missing?
-
-If:
-
-data/social.txt
-
-cannot be loaded or contains no usable rows, the social section displays an explanatory message explaining the required format.
-
----
-
-🌐 GitHub Pages
-
-BMT is designed as a static website.
-
-That means it does not require:
-
-Node.js
-PHP
-Python backend
-MySQL
-MongoDB
-PostgreSQL
-Server-side rendering
-
-The core application uses:
-
-HTML
-CSS
-JavaScript
-TXT files
-
-GitHub Pages can serve these files as static assets.
-
----
-
-🚀 Publishing BMT on GitHub Pages
-
-The general structure should be:
-
-repository/
-│
-├── index.html
-├── style.css
-├── script.js
-│
-└── data/
-    ├── বাংলা-১.txt
-    ├── ইংরেজি-১.txt
-    ├── ...
-    ├── teachers.txt
-    └── social.txt
-
-Then:
-
-1. Push the files to GitHub.
-2. Open repository settings.
-3. Open Pages.
-4. Select the branch containing the website.
-5. Select the appropriate root directory.
-6. Save.
-7. Wait for GitHub Pages to publish.
-8. Open the generated Pages URL.
-
----
-
-💻 Local Development
-
-If you are developing the website on a computer, a local HTTP server is recommended.
+Notes should belong to the correct subject.
 
 For example:
 
-python3 -m http.server 8000
+Subject A
+    ↓
+Subject A Notes
 
-Then open:
+Subject B
+    ↓
+Subject B Notes
 
-http://localhost:8000
+This keeps information separated and easier to find.
 
-This is preferable to simply double-clicking "index.html".
+A note should ideally have:
 
----
-
-🚫 Why "file://" Can Be a Problem
-
-When a browser opens:
-
-file:///...
-
-instead of:
-
-http://...
-
-browser security restrictions can prevent JavaScript from fetching local files in the same way a web server would provide them.
-
-Because BMT uses:
-
-fetch(...)
-
-to load the ".txt" files, development through a local server is safer and more predictable.
-
-The existing project documentation also recommends using a local HTTP server for this reason.
+- a clear title;
+- understandable content;
+- correct subject placement;
+- useful links where applicable.
 
 ---
 
-➕ Adding a New Subject
-
-Suppose you want to add:
-
-Business Law
-
-You need to update the "SUBJECTS" array in "script.js".
-
-Conceptually:
-
-{
-  name: "Business Law",
-  tab: "gold",
-  icon: "book"
-}
-
-Then create:
-
-data/Business Law.txt
-
-The filename must correspond to the subject name.
-
----
-
-🇧🇩 Adding a Bangla Subject
-
-Suppose you want:
-
-ব্যবসায় আইন
-
-Create:
-
-data/ব্যবসায় আইন.txt
-
-and configure:
-
-{
-  name: "ব্যবসায় আইন",
-  tab: "gold",
-  icon: "book"
-}
-
-JavaScript handles the URL encoding.
-
----
-
-🏷️ Choosing a Subject Tab
-
-Current configuration uses:
-
-gold
-teal
-rust
-
-Use an existing value unless you intentionally modify the CSS variable system.
-
----
-
-🖼️ Choosing a Subject Icon
-
-Use one of the existing icon names:
-
-book
-language
-computer
-calculator
-coins
-globe
-briefcase
-megaphone
-chip
-users
-
-If you use:
-
-icon: "book"
-
-the book SVG is displayed.
-
----
-
-✏️ Renaming a Subject
-
-Suppose the current subject is:
-
-বাংলা-১
-
-and you rename it to:
-
-বাংলা
-
-You must update both:
-
-script.js
-
-and:
-
-data/বাংলা-১.txt
-
-to the new matching filename.
-
-Otherwise JavaScript will request a file based on the new name while the repository still contains the old file.
-
----
-
-🗑️ Removing a Subject
-
-To remove a subject from the visible subject list:
-
-1. Remove its object from "SUBJECTS".
-2. Decide whether its ".txt" file should remain as an archive.
-3. Do not delete content unless you are sure you no longer need it.
-
-Removing a subject from the configuration prevents the website from creating its subject card.
-
----
-
-📝 Adding Homework
-
-Open the correct subject file.
-
-Example:
-
-data/বাংলা-১.txt
-
-Add:
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-আজকের বাংলা হোমওয়ার্ক:
-
-১. অধ্যায় ৪ পড়তে হবে।
-২. প্রশ্ন ১–৫ লিখতে হবে।
--
-
-Save and commit.
-
----
-
-📌 Adding a Permanent Note
-
-A note does not necessarily need a date.
-
-Example:
-
--
-গুরুত্বপূর্ণ:
-
-এই বিষয়ের পরীক্ষার জন্য অধ্যায় ১–৫ ভালোভাবে পড়তে হবে।
--
-
-Because it has no date, it will simply remain in the position where the post appears in the file.
-
----
-
-📚 Adding Classwork
-
-Example:
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-আজকের ক্লাসওয়ার্ক:
-
-পৃষ্ঠা ২০–২৫ সম্পন্ন করতে হবে।
--
-
----
-
-🖼️ Adding an Image
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-আজকের ক্লাসের ছবি:
-
-IMG: https://example.com/class.jpg
--
-
----
-
-🎥 Adding a Video
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-ক্লাস ভিডিও:
-
-VID: https://example.com/class.mp4
--
-
----
-
-🎵 Adding Audio
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-শোনার জন্য অডিও:
-
-AUD: https://example.com/audio.mp3
--
-
----
-
-🔗 Adding a Button
-
--
-LINK: https://example.com (Open Website)
--
-
----
-
-📁 Adding a Drive Button
-
--
-DRIVE: https://drive.google.com/example (Class PDF)
--
-
----
-
-🧩 Complete Realistic Post
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-আজকের গুরুত্বপূর্ণ কাজ:
-
-১. অধ্যায় ৫ পড়তে হবে।
-২. প্রশ্ন ১–১০ লিখতে হবে।
-৩. আগামী ক্লাসে খাতা আনতে হবে।
-
-IMG: https://example.com/homework.jpg
-
-VID: https://example.com/explanation.mp4
-
-AUD: https://example.com/lecture.mp3
-
-DRIVE: https://drive.google.com/example (PDF)
-
-LINK: https://example.com (Additional Material)
--
-
----
-
-🧠 Content vs Code
-
-This distinction should always be remembered.
-
-Content
-
-Homework
-Notes
-Classwork
-Dates
-Images
-Videos
-Audio
-Links
-Teacher names
-Teacher numbers
-Social links
-
-→ put these into the appropriate data files.
-
-Code
-
-How posts are parsed
-How subjects are loaded
-How buttons are created
-How media opens
-How teacher cards work
-How social cards work
-
-→ this belongs in JavaScript.
-
-Appearance
-
-Colors
-Sizes
-Spacing
-Borders
-Layout
-Typography
-Animations
-
-→ this belongs in CSS.
-
----
-
-🧭 Source of Truth
-
-For subject configuration:
-
-script.js
-
-For subject content:
-
-data/<subject>.txt
-
-For teacher data:
-
-data/teachers.txt
-
-For social data:
-
-data/social.txt
-
-For page structure:
-
-index.html
-
-For visual styling:
-
-style.css
-
----
-
-🚫 What You Should Never Do
-
-❌ Do not put homework in "script.js"
-
-Bad:
-
-const homework = "Read chapter 5";
-
-Normal homework belongs in the subject data file.
-
----
-
-❌ Do not put homework in "style.css"
-
-CSS should not contain academic content.
-
----
-
-❌ Do not randomly rename data files
-
-If JavaScript expects:
-
-data/বাংলা-১.txt
-
-do not rename it to:
-
-data/bangla.txt
-
-unless you also change the subject configuration.
-
----
-
-❌ Do not remove "data/"
-
-The current code expects:
-
-data/
-
----
-
-❌ Do not use a different separator without changing the parser
-
-The parser currently expects:
-
--
-
-as the post boundary.
-
----
-
-❌ Do not assume every URL is a media file
-
-A URL is only automatically treated as an image/video/audio when you use the corresponding explicit tag.
-
-For reliable behavior, use:
-
-IMG:
-VID:
-AUD:
-
----
-
-⚠️ Common Mistakes
-
-Mistake 1 — Wrong folder
-
-Wrong:
-
-বাংলা-১.txt
-
-at repository root.
-
-Correct:
-
-data/বাংলা-১.txt
-
----
-
-Mistake 2 — Wrong filename
-
-Configured:
-
-বাংলা-১
-
-File:
-
-বাংলা১.txt
-
-These are not necessarily the same.
-
----
-
-Mistake 3 — Missing separator
-
-Bad:
-
-DATE: ...
-Homework
-
-DATE: ...
-Another homework
-
-This can become one combined block.
-
-Better:
-
--
-DATE: ...
-Homework
--
-
--
-DATE: ...
-Another homework
--
-
----
-
-Mistake 4 — Wrong teacher separator
-
-Correct:
-
-Name | Subject | Phone | Sir
-
-Not:
-
-Name - Subject - Phone - Sir
-
----
-
-Mistake 5 — Wrong social separator
-
-Correct:
-
-WhatsApp Group | https://...
-
-Not:
-
-WhatsApp Group - https://...
-
----
-
-🛠️ Troubleshooting
-
-Problem: Subject does not open
-
-Check:
-
-Is the subject in SUBJECTS?
-        ↓
-Does the matching TXT file exist?
-        ↓
-Is it inside data/?
-        ↓
-Does the filename match?
-        ↓
-Was the file committed?
-
----
-
-Problem: "File not found"
-
-Check the exact expected path.
-
-For:
-
-বাংলা-১
-
-the expected path is conceptually:
-
-data/বাংলা-১.txt
-
----
-
-Problem: No posts appear
-
-Check:
-
-1. The file exists.
-2. The file contains non-empty content.
-3. The post contains at least text or recognized media/link content.
-4. The separators are correct.
-
----
-
-Problem: Two posts appear as one
-
-Check whether you forgot a standalone:
-
--
-
-between them.
-
----
-
-Problem: Image does not appear
-
-Check:
-
-IMG: https://...
-
-Then open the image URL directly.
-
-If the image URL itself does not work, BMT cannot make it work.
-
----
-
-Problem: Video does not appear
-
-Check:
-
-VID: https://...
-
-and confirm the URL actually points to an accessible video resource.
-
----
-
-Problem: Audio does not work
-
-Check:
-
-AUD: https://...
-
-and verify that the external URL is accessible and provides a browser-compatible audio resource.
-
----
-
-Problem: Teacher buttons are missing
-
-Check:
-
-Name | Subject | Phone | Sir
-
-If the phone field is empty, the action buttons are not created.
-
----
-
-Problem: WhatsApp opens incorrectly
-
-Check the phone number.
-
-Use a normal number such as:
-
-01712345678
-
-or:
-
-8801712345678
-
-Avoid putting unrelated characters in the phone field.
-
----
-
-⚡ Performance
-
-BMT is designed around static files.
-
-There is no requirement for a continuously running application server.
-
-Subject content is loaded when a subject is opened.
-
-This is important because the website does not have to load every subject's complete post content before the student chooses a subject.
-
-The implementation also keeps loaded posts in memory through "postCache", avoiding repeated fetch/parse operations for the same subject during the current page session.
-
----
-
-🔐 Security
-
-BMT is not a private database.
-
-Anything stored in a public GitHub repository should be considered public.
-
-Never put:
-
-Passwords
-API keys
-Private tokens
-Secret credentials
-Private documents
-Sensitive personal information
-
-inside public data files.
-
-A ".txt" file is not a security mechanism.
-
----
-
-🌍 External URLs
-
-BMT can display content hosted elsewhere.
-
-That means the final result can depend on external services.
+24. How to Add Links
+
+Before adding a link:
+
+1. Make sure the URL is correct.
+2. Make sure the destination exists.
+3. Make sure the resource belongs to the subject.
+4. Use a clear label.
+5. Test the link.
 
 For example:
 
-BMT
- ↓
-External image server
+❌ Click Here
 
-If the external server removes the image, the image may stop working in BMT.
+✅ English Study Material
 
-Likewise:
-
-BMT
- ↓
-Google Drive
-
-If the Drive file becomes inaccessible, BMT cannot bypass Google's permissions.
+A descriptive label tells the student what they are about to open.
 
 ---
 
-📱 Mobile Behavior
+25. How to Maintain the Project
 
-The project is designed for student use across screen sizes.
+Maintenance means keeping the project healthy after it has been created.
 
-However, external media behavior can still depend on the browser and device.
+Regular maintenance includes:
 
-For example:
+- checking links;
+- correcting spelling;
+- removing outdated resources;
+- updating notes;
+- checking mobile layout;
+- checking buttons;
+- checking subject navigation;
+- checking content files;
+- checking the live website after changes.
 
-- video autoplay policies
-- phone call behavior
-- WhatsApp app availability
-- browser media support
+A website is not finished forever.
 
-are controlled partly by the device/browser.
+Educational content changes.
+
+Therefore, maintenance is part of the project.
 
 ---
 
-🧪 Testing Checklist
+26. GitHub Repository
 
-Before publishing a major update, test:
+The source code should be maintained in the project's GitHub repository.
 
-Website
+GitHub provides a central place to keep:
 
-- [ ] Homepage opens
-- [ ] Subject cards appear
-- [ ] Subject names are correct
-- [ ] Icons appear
-- [ ] Teacher section loads
-- [ ] Social section loads
+- website files;
+- content;
+- documentation;
+- project history;
+- changes.
+
+The repository should remain organized so that another person can understand it.
+
+---
+
+27. GitHub Pages
+
+The live BMT website is available through GitHub Pages:
+
+https://uuhjeike.github.io/BMT/
+
+GitHub Pages allows a repository containing web files to be published as a website.
+
+The basic concept is:
+
+GitHub Repository
+       ↓
+Website Files
+       ↓
+GitHub Pages
+       ↓
+Public Website
+
+This means that changes to the repository can eventually appear on the public website after GitHub Pages processes the updated files.
+
+---
+
+28. Deployment
+
+Deployment means making the current version of the project available through the live website.
+
+The simplified process is:
+
+Developer changes files
+          ↓
+Files are saved
+          ↓
+Changes are committed
+          ↓
+Changes are pushed to GitHub
+          ↓
+GitHub Pages processes the project
+          ↓
+Updated website becomes available
+
+The exact deployment behavior depends on the repository's GitHub Pages configuration.
+
+---
+
+29. Updating the Website
+
+A safe update workflow is:
+
+1. Make a small change
+2. Save it
+3. Check the changed file
+4. Commit the change
+5. Push it to GitHub
+6. Wait for deployment
+7. Open the live website
+8. Test the change
+
+Do not make a large number of unrelated changes without testing.
+
+Small changes are easier to understand and easier to repair if something goes wrong.
+
+---
+
+30. Beginner Explanation
+
+Imagine a school.
+
+The school has:
+
+- classrooms;
+- books;
+- teachers;
+- notes;
+- notice boards.
+
+Now imagine putting the school inside a website.
+
+That is the basic idea behind BMT.
+
+The website
+
+The website is the school building.
 
 Subjects
 
-- [ ] Every subject opens
-- [ ] Correct file is loaded
-- [ ] Correct posts appear
-- [ ] Post count is correct
+Subjects are classrooms.
 
-Text
+Resources
 
-- [ ] Bangla works
-- [ ] English works
-- [ ] Multiple lines work
-- [ ] Blank lines do not cause problems
+Resources are books.
 
-Post boundaries
+Notes
 
-- [ ] "-" works
-- [ ] Multiple posts work
-- [ ] Missing separators are understood as one block
-
-Media
-
-- [ ] Images appear
-- [ ] Multiple images appear
-- [ ] Videos appear
-- [ ] Audio appears
-- [ ] Lightbox opens
-- [ ] Escape closes lightbox
-
-Teachers
-
-- [ ] Teacher names appear
-- [ ] Subjects appear
-- [ ] Phone buttons work
-- [ ] WhatsApp buttons work
-
-Social
-
-- [ ] Social labels appear
-- [ ] Social URLs work
-
----
-
-🧰 Recommended Maintenance Workflow
-
-When adding normal academic content:
-
-1. Choose the correct subject.
-2. Open its TXT file.
-3. Create a new post.
-4. Add DATE if appropriate.
-5. Add the text.
-6. Add media if necessary.
-7. Save the file.
-8. Commit the change.
-9. Open the website.
-10. Open that subject.
-11. Verify the result.
-
-You normally do not need to modify:
-
-index.html
-style.css
-script.js
-
-for ordinary homework/notes updates.
-
----
-
-🧑‍💻 Developer Workflow
-
-When changing functionality:
-
-1. Identify which system is involved.
-2. Find the relevant JavaScript function.
-3. Change the smallest necessary part.
-4. Test the affected system.
-5. Test other systems that depend on it.
-6. Commit.
-7. Verify GitHub Pages.
-
----
-
-🧩 Developer Map
-
-Subject configuration
-
-Search for:
-
-const SUBJECTS
-
-Icons
-
-Search for:
-
-const ICONS
-
-Icon renderer
-
-Search for:
-
-function icon
-
-Post parser
-
-Search for:
-
-function parsePosts
-
-Post renderer
-
-Search for:
-
-function renderPost
-
-Subject opening
-
-Search for:
-
-async function openSubject
-
-Lightbox
-
-Search for:
-
-function openLightbox
-
-Teachers
-
-Search for:
-
-async function loadTeachers
-
-Social links
-
-Search for:
-
-async function loadSocial
-
-These functions are part of the current implementation.
-
----
-
-🧠 Complete Parser Reference
-
-A post is conceptually converted into:
-
-{
-  date: "",
-  text: [],
-  images: [],
-  videos: [],
-  audios: [],
-  links: []
-}
-
-During parsing:
-
-DATE
-  ↓
-date
-
-IMG
-  ↓
-images[]
-
-VID
-  ↓
-videos[]
-
-AUD
-  ↓
-audios[]
-
-DRIVE
-  ↓
-links[]
-
-LINK
-  ↓
-links[]
-
-Anything else
-  ↓
-text
-
-After parsing:
-
-Parsed object
-     ↓
-renderPost()
-     ↓
-HTML
-     ↓
-Browser
-
----
-
-🧠 Complete Teacher Reference
-
-Each teacher row becomes conceptually:
-
-Name
-Subject
-Phone
-Role
-
-Then:
-
-Teacher data
-     ↓
-loadTeachers()
-     ↓
-HTML teacher card
-     ↓
-Call + WhatsApp actions
-
----
-
-🧠 Complete Social Reference
-
-Each social row becomes:
-
-Label
-URL
-
-Then:
-
-social.txt
-     ↓
-loadSocial()
-     ↓
-social chip
-     ↓
-external website
-
----
-
-🔄 Complete BMT Data Flow
-
-Here is the entire application from beginning to end:
-
-                         GITHUB REPOSITORY
-                                │
-             ┌──────────────────┼──────────────────┐
-             │                  │                  │
-             ▼                  ▼                  ▼
-        index.html          style.css         script.js
-             │                  │                  │
-             │                  │                  │
-             └──────────────────┼──────────────────┘
-                                │
-                                ▼
-                           BROWSER LOAD
-                                │
-                                ▼
-                         SUBJECT CONFIG
-                                │
-                                ▼
-                         SUBJECT CARDS
-                                │
-                    USER CLICKS SUBJECT
-                                │
-                                ▼
-                         openSubject()
-                                │
-                                ▼
-                       SUBJECT FILE PATH
-                                │
-                                ▼
-                    data/SubjectName.txt
-                                │
-                                ▼
-                            fetch()
-                                │
-                                ▼
-                         response.text()
-                                │
-                                ▼
-                         parsePosts()
-                                │
-             ┌──────────────────┼─────────────────┐
-             │                  │                 │
-             ▼                  ▼                 ▼
-           TEXT               MEDIA             LINKS
-             │                  │                 │
-             │          ┌───────┼───────┐         │
-             │          │       │       │         │
-             │          ▼       ▼       ▼         │
-             │        IMG     VID     AUD         │
-             │          │       │       │         │
-             └──────────┼───────┼───────┼─────────┘
-                        │
-                        ▼
-                   renderPost()
-                        │
-                        ▼
-                     FEED UI
-                        │
-                        ▼
-                   STUDENT
-
----
-
-📌 Exact File Responsibilities
-
-File| Responsibility
-"index.html"| Website structure
-"style.css"| Website appearance
-"script.js"| Website behavior
-"README.md"| Documentation
-"data/বাংলা-১.txt"| বাংলা content
-"data/ইংরেজি-১.txt"| English content
-"data/কম্পিউটার অফিস অ্যাপ্লিকেশন-১.txt"| Computer content
-"data/ব্যবসায় গণিত ও পরিসংখ্যান.txt"| Mathematics/statistics content
-"data/হিসাববিজ্ঞান নীতি ও প্রয়োগ-১.txt"| Accounting content
-"data/অর্থনীতি ও বাণিজ্যিক ভূগোল.txt"| Economics/geography content
-"data/ব্যবসায় সংগঠন ও ব্যবস্থাপনা-১.txt"| Business organization/management content
-"data/মার্কেটিং নীতি ও প্রয়োগ-১.txt"| Marketing content
-"data/ডিজিটাল টেকনোলজি ইন বিজনেস-১.txt"| Digital technology content
-"data/হিউম্যান রিসোর্স ম্যানেজমেন্ট-১.txt"| HR content
-"data/teachers.txt"| Teacher information
-"data/social.txt"| Group/page/social URLs
-
----
-
-🧸 If You Forget Everything
-
-Remember these four rules:
-
-Rule 1
-
-TXT = CONTENT
-
-Rule 2
-
-JS = BRAIN
-
-Rule 3
-
-CSS = LOOK
-
-Rule 4
-
-HTML = STRUCTURE
-
-And:
-
-data/
-
-contains the study data.
-
----
-
-📝 Complete Subject File Template
-
-Copy this structure:
-
--
-DATE: ১ অক্টোবর ২০২৬
-
-আজকের ক্লাস:
-
-এখানে আপনার লেখা থাকবে।
-
-IMG: https://example.com/image.jpg
-
-VID: https://example.com/video.mp4
-
-AUD: https://example.com/audio.mp3
-
-DRIVE: https://drive.google.com/example (PDF)
-
-LINK: https://example.com (More Information)
--
-
--
-DATE: ৩০ সেপ্টেম্বর ২০২৬
-
-আগের ক্লাসের কাজ।
-
--
-
----
-
-👨‍🏫 Complete Teacher Template
-
-"data/teachers.txt"
-
-Md Example | English | 01700000000 | Sir
-Md Example 2 | Accounting | 01800000000 | Sir
-Example Madam | Marketing | 01900000000 | Madam
-
----
-
-📢 Complete Social Template
-
-"data/social.txt"
-
-WhatsApp Group | https://chat.whatsapp.com/example
-Facebook Group | https://facebook.com/example
-Telegram Group | https://t.me/example
-
----
-
-⚠️ Important Accuracy Notes
-
-This README intentionally distinguishes between what the current implementation actually does and what could be added later.
-
-For example:
-
-Currently implemented
-
-- Subject configuration
-- ".txt" loading
-- "-" post boundaries
-- "DATE"
-- "IMG"
-- "VID"
-- "AUD"
-- "DRIVE"
-- "LINK"
-- Multiple media entries
-- Media lightbox
-- Teacher loading
-- Phone links
-- WhatsApp links
-- Social loading
-- Subject post counts
-- Post caching
-- HTML escaping
-- Missing-file fallback behavior
-
-These are represented in the current "script.js".
-
-Not automatically claimed here
-
-This README does not claim that the current implementation has:
-
-- automatic date sorting
-- database storage
-- authentication
-- user accounts
-- real-time messaging
-- notifications
-- search
-- exam result management
-- offline-first functionality
-- server-side processing
-- automatic synchronization
-
-unless those features are actually implemented.
-
-This distinction keeps the documentation trustworthy.
-
----
-
-🚀 Future Expansion
-
-The architecture can be extended later.
-
-Possible additions include:
-
-🔎 Search
-📌 Pinned posts
-🏷️ Categories
-📅 Calendar
-⏰ Deadlines
-📊 Study progress
-📝 Dedicated notes
-📚 Chapter tracking
-📥 Downloads
-🔔 Notifications
-🌙 Theme controls
-📱 PWA support
-🗃️ Database integration
-👤 User accounts
-
-These should be considered future development ideas, not existing features unless implemented.
-
----
-
-🧱 Why the Architecture Is Useful
-
-The separation between:
-
-Code
-
-and:
-
-Content
-
-means a student can update study information without needing to understand JavaScript.
-
-For example:
-
-Old website code
-       +
-New TXT content
-       =
-Updated study information
-
-The website's brain stays the same.
-
-Only the notebook changes.
-
----
-
-🌟 The Core Philosophy
-
-BMT follows this philosophy:
-
-«Make the code handle the system, and make the text files hold the information.»
-
-This creates a clean separation.
-
-The website knows:
-
-«"How do I display a post?"»
-
-The TXT file knows:
-
-«"What should the post say?"»
-
-That is the fundamental architecture.
-
----
-
-🔬 Developer-Level Mental Model
-
-A developer can think of BMT as a very small content-rendering engine.
-
-Input:
-
-Plain text
-
-Parser:
-
-parsePosts()
-
-Intermediate representation:
-
-{
-  date,
-  text,
-  images,
-  videos,
-  audios,
-  links
-}
-
-Renderer:
-
-renderPost()
-
-Output:
+Notes are notebooks.
 
 HTML
 
-Browser:
+HTML builds the rooms.
 
-HTML + CSS
+CSS
 
-Result:
+CSS paints and arranges the rooms.
 
-Visible study feed
+JavaScript
 
----
+JavaScript makes things interactive.
 
-🧭 Final Mental Model
+GitHub
 
-The entire BMT project can ultimately be remembered as:
+GitHub stores the school's digital files.
 
-                    BMT
-                     │
-          ┌──────────┴──────────┐
-          │                     │
-        CODE                  CONTENT
-          │                     │
-    ┌─────┼─────┐          ┌────┼─────┐
-    │     │     │          │    │     │
-   HTML  CSS    JS       Subjects Teachers Social
-    │     │     │          │
-    │     │     └──────────┤
-    │     │                │
-    └─────┴────────────────┘
-              │
-              ▼
-           BROWSER
-              │
-              ▼
-         BMT WEBSITE
-              │
-              ▼
-           STUDENT
+GitHub Pages
 
-Or, even simpler:
+GitHub Pages opens the school to students through the internet.
 
-📄 TXT
-   ↓
-🧠 JavaScript
-   ↓
-🌐 Website
-   ↓
-👨‍🎓 Student
+That is BMT in very simple language.
 
 ---
 
-❤️ Final Statement
+31. Simple Example
 
-BMT is designed around one simple idea:
+Suppose a student wants to study English.
 
-«Academic information should be easy to add, easy to understand, easy to maintain, and easy to access.»
+The student:
 
-The project does this by separating:
+Open BMT
+   ↓
+Find English
+   ↓
+Open English
+   ↓
+Choose required material
+   ↓
+Study
+   ↓
+Open English notes if necessary
 
-Structure → HTML
-Appearance → CSS
-Behavior → JavaScript
-Content → TXT
+The student does not need to know:
 
-Once this separation is understood, maintaining BMT becomes extremely simple.
+- JavaScript;
+- Git;
+- HTML;
+- CSS;
+- GitHub;
+- deployment.
 
-If you want to add homework:
+Those are development details.
 
-Edit the subject TXT file.
-
-If you want to add a teacher:
-
-Edit teachers.txt.
-
-If you want to add a group/page:
-
-Edit social.txt.
-
-If you want to change how the website behaves:
-
-Edit script.js.
-
-If you want to change how it looks:
-
-Edit style.css.
-
-If you want to change the page structure:
-
-Edit index.html.
-
-That is the complete philosophy behind BMT.
+The student only needs to use the website.
 
 ---
 
-🌐 Project Links
+32. Project Workflow
+
+The overall project workflow can be represented as:
+
+                 ┌───────────────┐
+                 │     BMT       │
+                 └───────┬───────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Choose Subject  │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Choose Resource │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Read / Open     │
+                │ Learning        │
+                │ Material        │
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ Check Notes     │
+                │ if necessary    │
+                └─────────────────┘
+
+This simple workflow is the heart of the project.
+
+---
+
+33. Design Principles
+
+BMT should follow several important principles.
+
+33.1 Simplicity
+
+The interface should not be complicated just for the sake of looking complicated.
+
+33.2 Organization
+
+Related information should remain together.
+
+33.3 Separation
+
+Different subjects should remain clearly separated.
+
+33.4 Maintainability
+
+Future updates should be reasonably easy.
+
+33.5 Performance
+
+The website should avoid unnecessary resource usage.
+
+33.6 Consistency
+
+Similar things should behave similarly.
+
+33.7 Readability
+
+Students should be able to understand what they are seeing.
+
+---
+
+34. Reliability
+
+A reliable educational website should make it easy to detect problems.
+
+Common problems include:
+
+Broken link
+
+A resource URL no longer works.
+
+Missing file
+
+The website expects a file that does not exist.
+
+Incorrect filename
+
+The website requests one filename while the repository contains another.
+
+Incorrect path
+
+The file exists but is located somewhere different from the expected location.
+
+Content formatting problem
+
+The content exists but does not follow the expected format.
+
+Browser problem
+
+The feature behaves differently depending on browser support.
+
+When something breaks, check the browser's developer tools and the repository structure before changing unrelated code.
+
+---
+
+35. Limitations
+
+BMT is a web-based project.
+
+Therefore, its capabilities depend on:
+
+- browser support;
+- internet connectivity for externally hosted resources;
+- availability of linked websites;
+- GitHub Pages availability;
+- correctness of repository files;
+- correct content paths.
+
+If an external resource disappears, BMT cannot control that external service.
+
+If an external link changes, the BMT resource entry may need to be updated.
+
+---
+
+36. Future Improvements
+
+Possible future improvements may include:
+
+- improved search;
+- better subject navigation;
+- richer notes;
+- bookmarks;
+- offline support;
+- downloadable resources;
+- improved accessibility;
+- progress tracking;
+- better content organization;
+- automated link checking;
+- improved mobile navigation;
+- additional study tools.
+
+Future features should be added carefully.
+
+A new feature should solve a real problem rather than simply making the website more complicated.
+
+---
+
+37. Development Guidelines
+
+Anyone modifying BMT should follow these principles.
+
+Rule 1 — Understand before changing
+
+Do not change a file without understanding what it does.
+
+Rule 2 — Do not break existing features
+
+A new feature should not silently remove an existing feature.
+
+Rule 3 — Keep subject content separated
+
+Do not mix unrelated subjects.
+
+Rule 4 — Keep naming consistent
+
+Follow the existing naming conventions.
+
+Rule 5 — Test after changes
+
+Always check the live website after publishing.
+
+Rule 6 — Keep the project lightweight
+
+Avoid unnecessary dependencies and large assets.
+
+Rule 7 — Update documentation
+
+If the architecture changes significantly, update this README.
+
+---
+
+38. Contribution
+
+Contributions can improve the project when they are organized and compatible with the project's purpose.
+
+A contribution may include:
+
+- correcting content;
+- fixing a broken link;
+- improving accessibility;
+- fixing a bug;
+- improving documentation;
+- improving responsive behavior;
+- adding useful educational resources;
+- improving maintainability.
+
+Before making a major change, understand the existing project structure.
+
+---
+
+39. Credits
+
+Project
+
+BMT — Business Management Technology
 
 Live Website
 
 https://uuhjeike.github.io/BMT/
 
-GitHub Repository
+Repository
 
-https://github.com/uuhjeike/BMT/
+The project's source repository is hosted on GitHub.
+
+Purpose
+
+Educational organization and accessibility of Business Management Technology study resources.
 
 ---
 
-🏁 BMT
+40. License
 
-Business Management Technology
+The license should match the actual license file included in the repository.
 
-Learn. Build. Grow.
+If the repository does not currently contain a license, do not claim that the project is licensed under MIT, Apache, GPL, or another license.
 
-«One repository. One study hub. One simple system.»
+A project license defines what other people are legally allowed to do with the project's code and content.
+
+Before adding a license, choose one intentionally and add the corresponding "LICENSE" file to the repository.
+
+---
+
+41. Final Summary
+
+BMT is a simple idea with an important purpose:
+
+«Create one organized digital place for Business Management Technology study resources.»
+
+The project separates the important parts of a website:
+
+HTML
+  ↓
+Structure
+
+CSS
+  ↓
+Appearance
+
+JavaScript
+  ↓
+Behavior
+
+Content Files
+  ↓
+Information
+
+GitHub
+  ↓
+Project Storage
+
+GitHub Pages
+  ↓
+Public Website
+
+For a student, the process is even simpler:
+
+Open BMT
+   ↓
+Choose a subject
+   ↓
+Choose a resource
+   ↓
+Study
+   ↓
+Use notes when needed
+
+For a developer, the responsibility is:
+
+Keep the structure organized
+        ↓
+Keep content correct
+        ↓
+Keep links working
+        ↓
+Keep the interface usable
+        ↓
+Test changes
+        ↓
+Maintain documentation
+
+The ultimate goal is not to make BMT unnecessarily complicated.
+
+The goal is to make it useful, understandable, maintainable, and easy to expand.
+
+---
+
+BMT in One Sentence
+
+BMT is a lightweight educational web platform that organizes Business Management Technology subjects, learning resources, and subject-specific notes into one accessible digital study environment.
+
+---
+
+BMT in Five Words
+
+Organize. Learn. Access. Update. Grow.
+
+---
+
+Project Philosophy
+
+«The best educational tool is not the one with the most features; it is the one that makes finding and using the right information easy.»
+
+---
+
+End of BMT Documentation
