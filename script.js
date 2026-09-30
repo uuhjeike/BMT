@@ -1,16 +1,16 @@
 /* =========================================================
-   STUDY HUB — script.js
-   Everything content-related is read from plain .txt files in /data.
-   To add a subject: add an entry to SUBJECTS below and create its
-   matching data/<slug>.txt file. See README.md for the post syntax.
+   STUDY HUB — script.js  (performance build)
+   Everything content-related is read from plain .txt files in the
+   GitHub repo. To add a subject: add an entry to SUBJECTS below and
+   upload its matching "<subject name>.txt" file. The post rules are
+   UNCHANGED — every post sits between "-" lines.
    ========================================================= */
 
 /* Content lives in Alpha's GitHub repo (uuhjeike/BMT, branch main), one
    file per subject, named EXACTLY after the subject (Bangla name + ".txt"),
    sitting at the repo ROOT — not inside a /data folder. Fetched straight
    from raw.githubusercontent.com so the site works even opened as a local
-   file (no CORS issue, unlike fetching a local .txt via file://). To point
-   this at a different repo, just change GITHUB_RAW_BASE below. */
+   file. To point this at a different repo, change GITHUB_RAW_BASE below. */
 const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/uuhjeike/BMT/main/";
 
 const SUBJECTS = [
@@ -60,16 +60,10 @@ function icon(name){ return `<svg viewBox="0 0 24 24">${ICONS[name]||ICONS.link}
 
 /* ---------------------------------------------------------
    URL HELPERS
-   - resolveUrl(): if someone pastes a normal github.com "blob" page
-     link (what you get from browsing the repo in a browser and
-     copying the address bar), it silently rewrites it to the raw
-     file link so the browser can actually load the image/video —
-     this is why pasted GitHub links were showing as broken media.
-   - youTubeEmbedUrl(): turns any youtube.com/youtu.be link into an
-     embeddable player URL, or null if it isn't a YouTube link.
-   - platformInfo(): guesses a nice Bangla label + icon for a bare
-     link based on its domain (Facebook, Instagram, TikTok, Telegram,
-     WhatsApp, Google Drive, YouTube, or a generic link).
+   - resolveUrl(): a normal github.com "blob" page link is silently
+     rewritten to the raw file link so the browser can load it.
+   - youTubeEmbedUrl(): youtube.com/youtu.be link -> embeddable URL.
+   - platformInfo(): Bangla label + icon for a bare link by domain.
 --------------------------------------------------------- */
 function resolveUrl(url){
   const m = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^?#]+?)\/?(\?.*)?$/i);
@@ -108,13 +102,30 @@ function platformInfo(url){
   return { label:"লিংক", icon:"link" };
 }
 
+/* ---------------------------------------------------------
+   PHOTO RESIZER — the real cause of the heavy feel.
+   Phone photos are ~13 megapixels / ~3 MB each. Showing one as a small
+   thumbnail still forces the phone to download and decode all 13 MP
+   (~50 MB of RAM per photo). So the FEED asks a free image service
+   (wsrv.nl) for a 1200px-wide copy instead — about 100 KB, ~8 MB RAM.
+   Safe by design: if the service is slow (9 s), blocked or down, the
+   site automatically falls back to the original photo, exactly as before.
+   The popup and the "original quality" link ALWAYS use the untouched
+   original file. To switch this off completely: PHOTO_RESIZER = false.
+--------------------------------------------------------- */
+const PHOTO_RESIZER = true;
+const THUMB_WIDTH = 1200;
+function thumbUrl(src){
+  if(!PHOTO_RESIZER || !/^https?:\/\//i.test(src) || /\.gif(\?.*)?$/i.test(src)) return src;
+  return "https://wsrv.nl/?url=" + encodeURIComponent(src) + "&w=" + THUMB_WIDTH + "&we&q=80&output=webp";
+}
+
 const IMG_EXT_RE = /\.(jpe?g|png|gif|webp|avif|bmp)(\?.*)?$/i;
 const VID_EXT_RE = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
 const AUD_EXT_RE = /\.(mp3|wav|m4a|aac|flac|ogg)(\?.*)?$/i;
 
-/* A bare link line (no DATE:/IMG:/etc. tag in front of it) gets
-   auto-classified instead of being dropped into plain text — this
-   is the "-  Link  -" style you were already using. */
+/* A bare link line (no DATE:/IMG:/etc. tag in front of it) is
+   auto-classified instead of being dropped into plain text. */
 function classifyBareUrl(post, rawUrl){
   const url = resolveUrl(rawUrl.trim());
   const yt = youTubeEmbedUrl(url);
@@ -127,8 +138,7 @@ function classifyBareUrl(post, rawUrl){
 }
 
 /* Parses "15 Jan 2026" style dates (and simple Bangla-numeral /
-   Bangla-month variants) into a sortable timestamp, or null if the
-   date can't be understood. */
+   Bangla-month variants) into a sortable timestamp, or null. */
 const BN_MONTHS = { "জানুয়ারি":0,"ফেব্রুয়ারি":1,"মার্চ":2,"এপ্রিল":3,"মে":4,"জুন":5,"জুলাই":6,"আগস্ট":7,"সেপ্টেম্বর":8,"অক্টোবর":9,"নভেম্বর":10,"ডিসেম্বর":11 };
 function parseFlexibleDate(str){
   if(!str) return null;
@@ -142,15 +152,10 @@ function parseFlexibleDate(str){
   return isNaN(d.getTime()) ? null : d.getTime();
 }
 
-/* Newest first. Posts with a real DATE: are ordered by that date;
-   posts with no date fall after the dated ones, ordered by file
-   position — since new posts are added at the TOP of the file, the
-   post with the lowest index (i) is the most recently added, so it
-   needs to sort first within that group. (This was previously
-   backwards — b.i - a.i — which put the most recently added
-   undated post LAST instead of first; that was the bug where a new
-   post kept appearing to sit under the old one.) Used for every
-   feed — subjects and social alike. */
+/* Newest first. Posts with a real DATE: are ordered by that date; posts
+   with no date fall after the dated ones, ordered by file position —
+   new posts are added at the TOP of the file, so the lowest index is the
+   most recently added and sorts first. Used for every feed. */
 function sortPostsLatestFirst(posts){
   return posts
     .map((post, i) => ({ post, i, ts: parseFlexibleDate(post.date) }))
@@ -165,7 +170,7 @@ function sortPostsLatestFirst(posts){
 
 
 /* ---------------------------------------------------------
-   POST TEXT-FILE PARSER
+   POST TEXT-FILE PARSER  (rules unchanged)
    Each post sits between "-" lines, the familiar way:
        -
        DATE: ...
@@ -181,17 +186,13 @@ function sortPostsLatestFirst(posts){
    Lines starting with "#" are comments and ignored.
    Recognised tags (case-insensitive), one per line:
      DATE: 15 Jan 2026
-     IMG:  https://...              (repeatable -> photo gallery)
-     VID:  https://...              (repeatable -> video gallery, or a YouTube link -> embedded player)
+     IMG:  https://...              (repeatable -> photos)
+     VID:  https://...              (repeatable -> videos, or a YouTube link -> embedded player)
      AUD:  https://...              (repeatable -> audio track)
      DRIVE: https://... (লেবেল)     (repeatable -> drive button)
      LINK:  https://... (লেবেল)     (repeatable -> link button)
-   A bare link with no tag in front of it (just the URL on its own
-   line) is auto-detected too: an image/video/audio file extension
-   becomes a gallery item, a YouTube link becomes an embedded player,
-   and anything else (Facebook, Instagram, TikTok, a Drive link...)
-   becomes a labelled button. A normal github.com/.../blob/... link
-   is automatically rewritten to the working raw-file link.
+   A bare link with no tag in front of it is auto-detected too. A normal
+   github.com/.../blob/... link is rewritten to the working raw-file link.
    Any other line is treated as post text.
 --------------------------------------------------------- */
 function parsePosts(raw){
@@ -251,17 +252,36 @@ function parsePosts(raw){
 }
 
 function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
+/* ---------------------------------------------------------
+   POST RENDERING
+   Photos/videos are rendered as EMPTY boxes first (no src). A single
+   IntersectionObserver (below) gives each one its real src only when it
+   is about to scroll into view. That is what stops the feed from
+   downloading and decoding every original photo at the same moment.
+--------------------------------------------------------- */
 function mediaThumbHtml(kind, src, index){
+  const s = escapeHtml(src);
   if(kind === "img"){
-    return `<div class="media-thumb" data-kind="img" data-src="${escapeHtml(src)}">
-      <img src="${escapeHtml(src)}" loading="lazy" alt="ছবি ${index+1}">
+    return `<div class="media-thumb is-img" data-kind="img" data-src="${s}" role="button" tabindex="0" aria-label="ছবি ${index+1} বড় করে দেখো">
+      <img alt="" decoding="async">
     </div>`;
   }
-  return `<div class="media-thumb" data-kind="vid" data-src="${escapeHtml(src)}">
-    <video src="${escapeHtml(src)}" muted playsinline preload="metadata"></video>
+  return `<div class="media-thumb is-vid" data-kind="vid" data-src="${s}" role="button" tabindex="0" aria-label="ভিডিও চালাও">
+    <video muted playsinline preload="metadata"></video>
+    <div class="media-play">${icon("play")}</div>
+  </div>`;
+}
+
+/* YouTube: a light click-to-play cover instead of loading a full player
+   (about 1 MB of scripts each) for every embedded video in the feed. */
+function embedHtml(e){
+  const id = (e.embedUrl.split("/embed/")[1] || "").replace(/[^\w-]/g, "");
+  const cover = id ? `<img src="https://i.ytimg.com/vi/${escapeHtml(id)}/hqdefault.jpg" alt="" decoding="async" loading="lazy">` : "";
+  return `<div class="post-embed" data-embed="${escapeHtml(e.embedUrl)}" role="button" tabindex="0" aria-label="ভিডিও চালাও">
+    ${cover}
     <div class="media-play">${icon("play")}</div>
   </div>`;
 }
@@ -272,14 +292,11 @@ function renderPost(post){
     ...post.videos.map(src=>({kind:"vid",src})),
   ];
   const mediaHtml = media.length
-    ? `<div class="post-media-grid ${media.length===1?'single':''}">${media.map((m,i)=>mediaThumbHtml(m.kind,m.src,i)).join("")}</div>`
+    ? `<div class="post-media">${media.map((m,i)=>mediaThumbHtml(m.kind,m.src,i)).join("")}</div>`
     : "";
-  const embedsHtml = (post.embeds||[]).map(e=>`
-    <div class="post-embed">
-      <iframe src="${escapeHtml(e.embedUrl)}" title="ভিডিও" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>`).join("");
+  const embedsHtml = (post.embeds||[]).map(embedHtml).join("");
   const audioHtml = post.audios.map(src=>`
-    <div class="post-audio" data-src="${escapeHtml(src)}">
+    <div class="post-audio" data-src="${escapeHtml(src)}" role="button" tabindex="0">
       <span class="post-audio-icon">${icon("play")}</span>
       <span class="post-audio-label">অডিও শুনতে ক্লিক করো</span>
     </div>`).join("");
@@ -300,6 +317,73 @@ function renderPost(post){
 }
 
 /* ---------------------------------------------------------
+   LAZY MEDIA — load a photo/video only when it is near the screen,
+   then size its box to the file's REAL proportions so nothing is cropped.
+--------------------------------------------------------- */
+let mediaObserver = null;
+
+function sizeThumbToMedia(thumb, w, h){
+  if(!w || !h) return;
+  thumb.style.aspectRatio = w + " / " + h;
+  /* never blow a small photo up beyond its real width */
+  if(thumb.dataset.kind === "img") thumb.style.maxWidth = w + "px";
+}
+
+function loadThumbMedia(thumb){
+  const media = thumb.querySelector("img, video");
+  if(!media || media.dataset.started) return;
+  media.dataset.started = "1";
+  const src = thumb.dataset.src;
+  if(media.tagName === "IMG"){
+    const fast = thumbUrl(src);
+    let usedOriginal = (fast === src);
+    let timer = 0;
+    /* resized copy failed / too slow -> switch to the original photo */
+    const useOriginal = () => {
+      if(usedOriginal) return false;
+      usedOriginal = true;
+      clearTimeout(timer);
+      media.src = src;
+      return true;
+    };
+    media.addEventListener("load", () => {
+      clearTimeout(timer);
+      sizeThumbToMedia(thumb, media.naturalWidth, media.naturalHeight);
+    });
+    media.addEventListener("error", () => {
+      if(!useOriginal()) thumb.classList.add("failed");
+    });
+    if(!usedOriginal){
+      timer = setTimeout(() => { if(!media.naturalWidth) useOriginal(); }, 9000);
+    }
+    media.src = fast;
+  } else {
+    media.addEventListener("loadedmetadata", () => sizeThumbToMedia(thumb, media.videoWidth, media.videoHeight), { once:true });
+    media.addEventListener("error", () => thumb.classList.add("failed"), { once:true });
+    /* "#t=0.1" makes the browser paint the first frame as the cover */
+    media.src = src + "#t=0.1";
+  }
+}
+
+function observeMedia(scope, rootEl){
+  if(mediaObserver){ mediaObserver.disconnect(); mediaObserver = null; }
+  const thumbs = scope.querySelectorAll(".media-thumb");
+  if(!thumbs.length) return;
+  if(!("IntersectionObserver" in window)){
+    thumbs.forEach(loadThumbMedia);
+    return;
+  }
+  mediaObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(!entry.isIntersecting) return;
+      mediaObserver.unobserve(entry.target);
+      loadThumbMedia(entry.target);
+    });
+  }, { root: rootEl, rootMargin: "700px 0px" });
+  thumbs.forEach(t => mediaObserver.observe(t));
+}
+
+/* ---------------------------------------------------------
    SHELF (subject folder-cards)
 --------------------------------------------------------- */
 const shelf = document.getElementById("shelf");
@@ -309,14 +393,18 @@ SUBJECTS.forEach((s, i) => {
   s.domId = `count-${i}`;
   const card = document.createElement("div");
   card.className = "tile folder";
+  card.setAttribute("role", "button");
+  card.tabIndex = 0;
   card.style.setProperty("--tab", `var(--${s.tab})`);
-  card.style.animationDelay = `${Math.min(i*0.06,0.6)}s`;
   card.innerHTML = `
     <div class="folder-icon">${icon(s.icon)}</div>
-    <div class="folder-name">${s.name}</div>
+    <div class="folder-name">${escapeHtml(s.name)}</div>
     <div class="folder-meta"><span>খুলতে ক্লিক করো</span><span class="folder-count" id="${s.domId}"></span></div>
   `;
   card.addEventListener("click", () => openSubject(s));
+  card.addEventListener("keydown", e => {
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openSubject(s); }
+  });
   shelf.appendChild(card);
 });
 
@@ -331,11 +419,16 @@ const feedLoading = document.getElementById("feedLoading");
 const feedEmpty = document.getElementById("feedEmpty");
 const feedBody = document.getElementById("feedBody");
 
-/* Shared by every feed source (subjects + social): opens the same
-   sliding panel, shows the loading/empty states, and renders posts.
-   `loader` is an async function that returns a posts[] array (or
-   throws, with a message to show in the empty state). */
+/* Each open gets a ticket number. If someone opens subject A, closes it
+   and opens subject B before A finished loading, A's late answer is
+   ignored instead of overwriting B's posts. */
+let feedToken = 0;
+
+/* Shared by every feed source (subjects + social): opens the sliding
+   panel, shows loading/empty states, renders posts. `loader` is an async
+   function returning a posts[] array (or throwing a message to show). */
 async function openFeed({kicker, title, emptyText, loader}){
+  const token = ++feedToken;
   feedKicker.textContent = kicker;
   feedTitle.textContent = title;
   feedPosts.innerHTML = "";
@@ -346,7 +439,9 @@ async function openFeed({kicker, title, emptyText, loader}){
   feedBody.scrollTop = 0;
 
   try{
-    const posts = sortPostsLatestFirst(await loader());
+    const loaded = await loader();
+    if(token !== feedToken) return;
+    const posts = sortPostsLatestFirst(loaded);
     feedLoading.hidden = true;
     if(!posts.length){
       feedEmpty.hidden = false;
@@ -354,12 +449,14 @@ async function openFeed({kicker, title, emptyText, loader}){
       return;
     }
     feedPosts.innerHTML = posts.map(renderPost).join("");
-    [...feedPosts.children].forEach((el,i)=> el.style.animationDelay = `${Math.min(i*0.05,0.5)}s`);
-    bindMediaHandlers(feedPosts);
+    observeMedia(feedPosts, feedBody);
   }catch(err){
+    if(token !== feedToken) return;
     feedLoading.hidden = true;
     feedEmpty.hidden = false;
-    feedEmpty.textContent = err.message || "লোড করা যায়নি।";
+    feedEmpty.textContent = (err instanceof TypeError)
+      ? "ইন্টারনেট সংযোগে সমস্যা হচ্ছে — সংযোগ দেখে আবার চেষ্টা করো।"
+      : (err.message || emptyText || "লোড করা যায়নি।");
   }
 }
 
@@ -384,19 +481,9 @@ function openSubject(subject){
 }
 
 /* ---------------------------------------------------------
-   SOCIAL FEED — social.txt is now written with the exact same
-   post syntax as a subject file (DATE / IMG / VID / AUD / LINK,
-   blocks separated by "-" lines). Put your WhatsApp/Facebook/
-   Telegram links in a LINK: line inside each post, e.g.:
-
-     -
-     DATE: 15 Jan 2026
-     নতুন হোয়াটসঅ্যাপ গ্রুপ খোলা হয়েছে, সবাই জয়েন করো।
-     LINK: https://chat.whatsapp.com/xxxx (হোয়াটসঅ্যাপ গ্রুপ)
-     -
-
-   Clicking "যোগাযোগ" in the nav opens this as its own feed panel —
-   it is no longer a section on the homepage.
+   SOCIAL FEED — social.txt uses the exact same post syntax as a
+   subject file (DATE / IMG / VID / AUD / LINK, blocks separated by "-"
+   lines). Clicking "যোগাযোগ" in the nav opens it as its own feed panel.
 --------------------------------------------------------- */
 let socialCache = null;
 
@@ -408,7 +495,7 @@ function openSocialFeed(){
     async loader(){
       if(!socialCache){
         const res = await fetch(SOCIAL_FILE, {cache:"no-store"});
-        if(!res.ok) throw new Error();
+        if(!res.ok) throw new Error("GitHub রিপোতে এখনো social.txt পাওয়া যাচ্ছে না — uuhjeike/BMT রিপোর রুটে \"social.txt\" আপলোড করো (বিষয়ের ফাইলের মতোই DATE/LINK ফরম্যাটে)।");
         const raw = await res.text();
         socialCache = parsePosts(raw);
       }
@@ -419,50 +506,133 @@ function openSocialFeed(){
 document.getElementById("navSocial").addEventListener("click", openSocialFeed);
 
 function closeFeed(){
+  feedToken++;                      /* cancel any load still in flight */
+  if(mediaObserver){ mediaObserver.disconnect(); mediaObserver = null; }
   feedOverlay.classList.remove("open");
   document.body.style.overflow = "";
+  /* stop any playing YouTube cover-swapped iframe / media by clearing the feed */
+  setTimeout(() => { if(!feedOverlay.classList.contains("open")) feedPosts.innerHTML = ""; }, 350);
 }
 document.getElementById("feedClose").addEventListener("click", closeFeed);
 feedOverlay.addEventListener("click", e => { if(e.target === feedOverlay) closeFeed(); });
 
 /* ---------------------------------------------------------
-   LIGHTBOX — same click-to-expand behaviour for image, video, audio
+   LIGHTBOX — click-to-expand for photo, video, audio
+   Photo: fitted whole on screen (original proportions), with a link to
+   open the untouched original file in a new tab.
 --------------------------------------------------------- */
 const lightbox = document.getElementById("lightbox");
 const lightboxStage = document.getElementById("lightboxStage");
 
-function openLightbox(kind, src){
-  if(kind === "img") lightboxStage.innerHTML = `
-    <img src="${escapeHtml(src)}" alt="" decoding="async">
-    <a class="lightbox-original" href="${escapeHtml(src)}" target="_blank" rel="noopener">মূল ছবি নতুন ট্যাবে দেখো (আসল কোয়ালিটি)</a>`;
-  else if(kind === "vid") lightboxStage.innerHTML = `<video src="${escapeHtml(src)}" controls autoplay playsinline></video>`;
-  else if(kind === "aud") lightboxStage.innerHTML = `<audio src="${escapeHtml(src)}" controls autoplay></audio>`;
+let lightboxToken = 0;
+function openLightbox(kind, src, preview){
+  const s = escapeHtml(src);
+  const token = ++lightboxToken;
+  if(kind === "img"){
+    /* `preview` = the copy already loaded in the feed: it appears
+       instantly, then the untouched original replaces it in place. */
+    const first = (preview && preview !== src) ? preview : src;
+    lightboxStage.innerHTML = `
+      <img src="${escapeHtml(first)}" alt="" decoding="async">
+      <a class="lightbox-original" href="${s}" target="_blank" rel="noopener">মূল ছবি নতুন ট্যাবে দেখো (আসল কোয়ালিটি)</a>`;
+    const im = lightboxStage.querySelector("img");
+    let triedOriginal = (first === src);
+    im.addEventListener("error", () => {
+      if(token !== lightboxToken) return;
+      if(!triedOriginal){ triedOriginal = true; im.src = src; return; }   /* preview broke -> try original */
+      im.outerHTML = `<p class="lightbox-msg">ছবিটা লোড করা যায়নি।</p>`;
+    });
+    if(first !== src){
+      const hi = new Image();
+      hi.onload = () => {
+        if(token !== lightboxToken) return;
+        const cur = lightboxStage.querySelector("img");
+        if(cur) cur.src = src;
+      };
+      hi.src = src;
+    }
+  }
+  else if(kind === "vid") lightboxStage.innerHTML = `<video src="${s}" controls autoplay playsinline></video>`;
+  else if(kind === "aud") lightboxStage.innerHTML = `<audio src="${s}" controls autoplay></audio>`;
+  else return;
   lightbox.classList.add("open");
 }
 function closeLightbox(){
+  lightboxToken++;
+  const playing = lightboxStage.querySelector("video, audio");
+  if(playing){ try{ playing.pause(); }catch(e){} }
   lightbox.classList.remove("open");
   lightboxStage.innerHTML = "";
 }
 document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
-lightbox.addEventListener("click", e => { if(e.target === lightbox) closeLightbox(); });
+lightbox.addEventListener("click", e => {
+  if(e.target === lightbox || e.target === lightboxStage) closeLightbox();
+});
 document.addEventListener("keydown", e => {
   if(e.key !== "Escape") return;
   if(lightbox.classList.contains("open")) closeLightbox();
   else if(feedOverlay.classList.contains("open")) closeFeed();
 });
 
-function bindMediaHandlers(scope){
-  scope.querySelectorAll(".media-thumb").forEach(el=>{
-    el.addEventListener("click", () => openLightbox(el.dataset.kind, el.dataset.src));
-  });
-  scope.querySelectorAll(".post-audio").forEach(el=>{
-    el.addEventListener("click", () => openLightbox("aud", el.dataset.src));
-  });
+/* One delegated listener for everything clickable inside the feed —
+   photos, videos, audio, YouTube covers. Survives every re-render. */
+function playEmbed(el){
+  const url = el.dataset.embed;
+  if(!url) return;
+  el.removeAttribute("data-embed");
+  el.removeAttribute("role");
+  el.removeAttribute("tabindex");
+  el.innerHTML = `<iframe src="${escapeHtml(url)}?autoplay=1&rel=0&playsinline=1" title="ভিডিও" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 }
+feedPosts.addEventListener("click", e => {
+  const thumb = e.target.closest(".media-thumb");
+  if(thumb){
+    const im = thumb.querySelector("img");
+    const preview = (im && im.naturalWidth) ? (im.currentSrc || im.src) : "";
+    openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
+    return;
+  }
+  const aud = e.target.closest(".post-audio");
+  if(aud){ openLightbox("aud", aud.dataset.src); return; }
+  const emb = e.target.closest(".post-embed[data-embed]");
+  if(emb){ playEmbed(emb); }
+});
+feedPosts.addEventListener("keydown", e => {
+  if(e.key !== "Enter" && e.key !== " ") return;
+  const t = e.target;
+  if(t && t.getAttribute && t.getAttribute("role") === "button"){
+    e.preventDefault();
+    t.click();
+  }
+});
 
 /* ---------------------------------------------------------
-   TEACHERS  — data/teachers.txt lines: Name | Subject | Phone | Sir/Madam
+   TEACHERS — teachers.txt lines: Name | Subject | Phone | Sir/Madam
+   The card is one call link; the call / WhatsApp buttons are siblings,
+   never nested inside another link (nested links are invalid HTML and
+   the browser tears the card apart when it parses them).
 --------------------------------------------------------- */
+const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
+function bnToEn(str){ return str.replace(/[০-৯]/g, d => BN_DIGITS.indexOf(d)); }
+
+/* Accepts both:  Name | Subject | Phone | Sir/Madam
+   and the simple: Name - 01712345678   (phone found anywhere in the line) */
+function parseTeacherRow(row){
+  if(row.includes("|")){
+    const [name="", subject="", phone="", role=""] = row.split("|").map(p=>p.trim());
+    return { name, subject, phone: bnToEn(phone), role };
+  }
+  const flat = bnToEn(row);
+  const pm = flat.match(/\+?\d[\d\s().-]{6,}\d/);
+  const phone = pm ? pm[0].trim() : "";
+  const name = (pm ? flat.replace(pm[0], "") : row)
+    .replace(/[\s\-–—:,;|()]+$/, "").replace(/^[\s\-–—:,;|]+/, "").trim();
+  /* keep Bangla letters of the name from the ORIGINAL row (digits were only
+     converted for finding the number) */
+  const origName = pm ? row.slice(0, flat.indexOf(pm[0])).replace(/[\s\-–—:,;|()]+$/, "").trim() : name;
+  return { name: origName || name, subject:"", phone, role:"" };
+}
+
 function waLink(phone){
   const digits = phone.replace(/[^\d]/g, "");
   const local = digits.startsWith("880") ? digits : digits.startsWith("0") ? "88"+digits : "880"+digits;
@@ -479,19 +649,22 @@ async function loadTeachers(){
     const rows = raw.split("\n").map(l=>l.trim()).filter(l=>l && !l.startsWith("#"));
     if(!rows.length) throw new Error();
     grid.innerHTML = rows.map((row,i)=>{
-      const [name="", subject="", phone="", role=""] = row.split("|").map(p=>p.trim());
+      const { name, subject, phone, role } = parseTeacherRow(row);
       const tab = tabs[i % tabs.length];
-      const actions = phone ? `
-        <div class="tile-actions" onclick="event.stopPropagation()">
-          <a href="tel:${escapeHtml(phone)}" aria-label="কল করো">${icon("phone")}</a>
-          <a href="${waLink(phone)}" target="_blank" rel="noopener" aria-label="হোয়াটসঅ্যাপ">${icon("whatsapp")}</a>
-        </div>` : "";
-      return `<a class="tile teacher-tile" style="--tab:var(--${tab})" href="tel:${escapeHtml(phone)}">
+      const tel = phone.replace(/[^\d+]/g, "");
+      const inner = `
         <div class="folder-icon">${icon("users")}</div>
         <div class="folder-name">${escapeHtml(name)}</div>
-        <div class="folder-meta"><span>${escapeHtml(subject || role || "যোগাযোগ")}</span>${role ? `<span class="folder-count">${escapeHtml(role)}</span>` : ""}</div>
-        ${actions}
-      </a>`;
+        <div class="folder-meta"><span>${escapeHtml(subject || role || "যোগাযোগ")}</span>${role ? `<span class="folder-count">${escapeHtml(role)}</span>` : ""}</div>`;
+      const main = tel
+        ? `<a class="tile-main" href="tel:${escapeHtml(tel)}" aria-label="${escapeHtml(name)} — কল করো">${inner}</a>`
+        : `<div class="tile-main">${inner}</div>`;
+      const actions = tel ? `
+        <div class="tile-actions">
+          <a href="tel:${escapeHtml(tel)}" aria-label="কল করো">${icon("phone")}</a>
+          <a href="${waLink(phone)}" target="_blank" rel="noopener" aria-label="হোয়াটসঅ্যাপ">${icon("whatsapp")}</a>
+        </div>` : "";
+      return `<div class="tile teacher-tile" style="--tab:var(--${tab})">${main}${actions}</div>`;
     }).join("");
   }catch(err){
     grid.innerHTML = `<a class="tile tile-ghost" href="https://github.com/uuhjeike/BMT/edit/main/teachers.txt" target="_blank" rel="noopener">
@@ -505,9 +678,9 @@ async function loadTeachers(){
 loadTeachers();
 
 /* ---------------------------------------------------------
-   PULSE BAR — "unstoppable" stopwatch, counting up since
-   24 September 2026 (local time). Days/Hours/Minutes/Seconds,
-   updates every second, pinned above everything on the page.
+   UNSTOPPABLE — stopwatch counting up since 24 September 2026
+   (local time). Days/Hours/Minutes/Seconds, updates every second,
+   and only touches the page when a number actually changed.
 --------------------------------------------------------- */
 const UNSTOPPABLE_START = new Date(2026, 8, 24, 0, 0, 0); // month is 0-indexed: 8 = September
 const pDays = document.getElementById("pDays");
@@ -516,54 +689,14 @@ const pMins = document.getElementById("pMins");
 const pSecs = document.getElementById("pSecs");
 
 function pad(n){ return String(n).padStart(2,"0"); }
+function setText(el, v){ if(el.textContent !== v) el.textContent = v; }
 
 function updatePulse(){
   const diff = Math.max(0, Date.now() - UNSTOPPABLE_START.getTime());
   const totalSec = Math.floor(diff/1000);
-  pDays.textContent = Math.floor(totalSec/86400);
-  pHours.textContent = pad(Math.floor((totalSec%86400)/3600));
-  pMins.textContent = pad(Math.floor((totalSec%3600)/60));
-  pSecs.textContent = pad(totalSec%60);
+  setText(pDays, String(Math.floor(totalSec/86400)));
+  setText(pHours, pad(Math.floor((totalSec%86400)/3600)));
+  setText(pMins, pad(Math.floor((totalSec%3600)/60)));
+  setText(pSecs, pad(totalSec%60));
 }
 if(pDays){ updatePulse(); setInterval(updatePulse, 1000); }
-
-/* ---------------------------------------------------------
-   TILE LIGHT — tracks the pointer over any .tile and feeds it
-   into --mx/--my so the glass specular highlight (style.css)
-   follows the cursor, like light catching a tilted glass pane.
-   Coalesced onto rAF so it never fires more than once per frame.
---------------------------------------------------------- */
-let pendingGlowEvent = null;
-document.addEventListener("pointermove", e => {
-  const tile = e.target.closest(".tile");
-  if(!tile) return;
-  if(pendingGlowEvent === null){
-    requestAnimationFrame(() => {
-      const { tile: t, clientX, clientY } = pendingGlowEvent;
-      pendingGlowEvent = null;
-      const r = t.getBoundingClientRect();
-      t.style.setProperty("--mx", `${((clientX - r.left) / r.width * 100).toFixed(1)}%`);
-      t.style.setProperty("--my", `${((clientY - r.top) / r.height * 100).toFixed(1)}%`);
-    });
-  }
-  pendingGlowEvent = { tile, clientX: e.clientX, clientY: e.clientY };
-});
-
-/* ---------------------------------------------------------
-   SCROLL REVEAL — fades/rises .reveal elements in as they
-   enter the viewport (section headings, the unstoppable panel).
---------------------------------------------------------- */
-const revealItems = document.querySelectorAll(".reveal");
-if("IntersectionObserver" in window && revealItems.length){
-  const revealObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        entry.target.classList.add("in");
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2, rootMargin: "0px 0px -8% 0px" });
-  revealItems.forEach(el => revealObserver.observe(el));
-} else {
-  revealItems.forEach(el => el.classList.add("in"));
-}
