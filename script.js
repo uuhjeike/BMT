@@ -76,12 +76,12 @@ function youTubeEmbedUrl(url){
 function platformInfo(url){
   let host = "";
   try{ host = new URL(url).hostname.replace(/^www\./,""); }catch(e){}
-  if(/youtube\.com$|youtu\.be$/.test(host)) return { label:"ইউটিউব", icon:"youtube" };
-  if(/facebook\.com$|fb\.watch$/.test(host)) return { label:"ফেসবুক", icon:"facebook" };
+  if(/youtube\.com$\vert{}youtu\.be$/.test(host)) return { label:"ইউটিউব", icon:"youtube" };
+  if(/facebook\.com$\vert{}fb\.watch$/.test(host)) return { label:"ফেসবুক", icon:"facebook" };
   if(/instagram\.com$/.test(host)) return { label:"ইনস্টাগ্রাম", icon:"instagram" };
   if(/tiktok\.com$/.test(host)) return { label:"টিকটক", icon:"tiktok" };
-  if(/t\.me$|telegram\.org$/.test(host)) return { label:"টেলিগ্রাম", icon:"chat" };
-  if(/wa\.me$|whatsapp\.com$/.test(host)) return { label:"হোয়াটসঅ্যাপ", icon:"whatsapp" };
+  if(/t\.me$\vert{}telegram\.org$/.test(host)) return { label:"টেলিগ্রাম", icon:"chat" };
+  if(/wa\.me$\vert{}whatsapp\.com$/.test(host)) return { label:"হোয়াটসঅ্যাপ", icon:"whatsapp" };
   if(/drive\.google\.com$/.test(host)) return { label:"ড্রাইভ ফাইল", icon:"drive" };
   return { label:"লিংক", icon:"link" };
 }
@@ -224,7 +224,7 @@ function renderPost(post){
   
   const totalImgs = post.images.length;
   const mediaHtml = media.length
-    ? `<div class="post-media ${totalImgs > 1 ? 'photostack-group' : ''}">${media.map((m,i)=>mediaThumbHtml(m.kind, m.src, i, totalImgs)).join("")}</div>`
+    ? `<div class="post-media ${totalImgs > 1 ? 'photostack-group' : ''} ${totalImgs > 1 && media.every(m=>m.kind === "img") ? `photo-grid photo-grid-${totalImgs === 2 ? 2 : 3}` : ''}" data-photo-count="${totalImgs}">${media.map((m,i)=>mediaThumbHtml(m.kind, m.src, i, m.kind === "img" ? totalImgs : 0)).join("")}</div>`
     : "";
     
   const embedsHtml = (post.embeds||[]).map(embedHtml).join("");
@@ -254,8 +254,9 @@ let mediaObserver = null;
 
 function sizeThumbToMedia(thumb, w, h){
   if(!w || !h) return;
-  thumb.style.aspectRatio = w + " / " + h;
-  if(thumb.dataset.kind === "img") thumb.style.maxWidth = w + "px";
+  const grouped = !!thumb.closest(".photo-grid");
+  if(!grouped) thumb.style.aspectRatio = w + " / " + h;
+  if(thumb.dataset.kind === "img" && !grouped) thumb.style.maxWidth = w + "px";
 }
 
 function loadThumbMedia(thumb){
@@ -342,9 +343,8 @@ const feedBody = document.getElementById("feedBody");
 
 let feedToken = 0;
 
-/* Virtualized windowing parameters */
+/* Render every post in the selected subject. Keep lazy media loading for performance. */
 let currentPostsAll = [];
-const CHUNK_SIZE = 6;
 let renderedCount = 0;
 
 function renderChunk(postsToRender) {
@@ -353,40 +353,11 @@ function renderChunk(postsToRender) {
   observeMedia(feedPosts, feedBody);
 }
 
-function loadMoreIfNeeded() {
-  if (!feedBody) return;
-  // Keep adding batches while the bottom is near. On a wide screen the first batch
-  // may not even fill the panel, so no scroll event would ever fire — hence the loop.
-  let guard = 0;
-  while (
-    renderedCount < currentPostsAll.length && guard++ < 10 &&
-    feedBody.scrollTop + feedBody.clientHeight >= feedBody.scrollHeight - 300
-  ) {
-    const nextBatch = currentPostsAll.slice(renderedCount, renderedCount + CHUNK_SIZE);
-    renderedCount += nextBatch.length;
-    renderChunk(nextBatch);
-  }
-}
-
 function handleFeedScroll() {
-  if (!feedBody) return;
-  loadMoreIfNeeded();
-  const scrollTop = feedBody.scrollTop;
-
-  // Memory management: remove items far up if too many rendered
-  const articles = feedPosts.querySelectorAll('article.post');
-  if (articles.length > 12 && scrollTop > 1500) {
-    for (let i = 0; i < articles.length - 8; i++) {
-      const art = articles[i];
-      const div = art.nextElementSibling;
-      if (div && div.classList.contains('post-divider')) div.remove();
-      art.remove();
-    }
-  }
+  /* All posts remain in the document; scrolling never deletes earlier posts. */
 }
 
-feedBody.addEventListener('scroll', handleFeedScroll);
-window.addEventListener('resize', () => { if (feedOverlay.classList.contains('open')) loadMoreIfNeeded(); });
+feedBody.addEventListener("scroll", handleFeedScroll, { passive: true });
 
 async function openFeed({kicker, title, emptyText, loader}){
   const token = ++feedToken;
@@ -411,10 +382,8 @@ async function openFeed({kicker, title, emptyText, loader}){
       feedEmpty.textContent = emptyText || "এখনো কোনো পোস্ট নেই। প্রথম হোমওয়ার্কটা এখানেই যোগ হবে।";
       return;
     }
-    const initialBatch = currentPostsAll.slice(0, CHUNK_SIZE);
-    renderedCount = initialBatch.length;
-    renderChunk(initialBatch);
-    loadMoreIfNeeded();
+    renderedCount = currentPostsAll.length;
+    renderChunk(currentPostsAll);
   }catch(err){
     if(token !== feedToken) return;
     feedLoading.hidden = true;
@@ -477,92 +446,77 @@ feedOverlay.addEventListener("click", e => { if(e.target === feedOverlay) closeF
 
 const lightbox = document.getElementById("lightbox");
 const lightboxStage = document.getElementById("lightboxStage");
-const lightboxDots = document.getElementById("lightboxDots");
-const lightboxPrev = document.getElementById("lightboxPrev");
-const lightboxNext = document.getElementById("lightboxNext");
 
 let lightboxToken = 0;
-let lbGroup = [];            /* photo thumbs of the post that was opened (same post only) */
-let lbIndex = 0;
-let lbNavTimer = 0;
-const LB_NAV_MS = 2600;      /* how long the left/right buttons stay visible */
+let lightboxImages = [];
+let lightboxImageIndex = 0;
+let lightboxControlsTimer = 0;
 
-function renderLightboxImage(src, preview, token){
-  const s = escapeHtml(src);
-  const first = (preview && preview !== src) ? preview : src;
-  lightboxStage.innerHTML = `
-    <img src="${escapeHtml(first)}" alt="" decoding="async">
-    <a class="lightbox-original" href="${s}" target="_blank" rel="noopener">মূল ছবি নতুন ট্যাবে দেখো (আসল কোয়ালিটি)</a>`;
-  const im = lightboxStage.querySelector("img");
-  let triedOriginal = (first === src);
-  im.addEventListener("error", () => {
-    if(token !== lightboxToken) return;
-    if(!triedOriginal){ triedOriginal = true; im.src = src; return; }
-    im.outerHTML = `<p class="lightbox-msg">ছবিটা লোড করা যায়নি।</p>`;
+function renderLightboxImage(index){
+  if(!lightboxImages.length) return;
+  lightboxImageIndex = (index + lightboxImages.length) % lightboxImages.length;
+  const item = lightboxImages[lightboxImageIndex];
+  openLightbox("img", item.src, item.preview || item.src, true);
+  if(lightboxImages.length > 1) addLightboxNavigation();
+}
+function addLightboxNavigation(){
+  lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.remove());
+  if(lightboxImages.length < 2) return;
+  const prev = document.createElement("button");
+  prev.className = "lightbox-nav lightbox-prev";
+  prev.type = "button"; prev.setAttribute("aria-label", "আগের ছবি"); prev.textContent = "‹";
+  const next = document.createElement("button");
+  next.className = "lightbox-nav lightbox-next";
+  next.type = "button"; next.setAttribute("aria-label", "পরের ছবি"); next.textContent = "›";
+  const dots = document.createElement("div"); dots.className = "lightbox-dots";
+  lightboxImages.forEach((_, i) => {
+    const dot = document.createElement("button"); dot.type = "button"; dot.className = "lightbox-dot" + (i === lightboxImageIndex ? " active" : "");
+    dot.setAttribute("aria-label", `ছবি ${i+1}`); dot.addEventListener("click", e => { e.stopPropagation(); renderLightboxImage(i); }); dots.appendChild(dot);
   });
-  if(first !== src){
-    const hi = new Image();
-    hi.onload = () => {
-      if(token !== lightboxToken) return;
-      const cur = lightboxStage.querySelector("img");
-      if(cur) cur.src = src;
-    };
-    hi.src = src;
-  }
+  prev.addEventListener("click", e => { e.stopPropagation(); renderLightboxImage(lightboxImageIndex - 1); });
+  next.addEventListener("click", e => { e.stopPropagation(); renderLightboxImage(lightboxImageIndex + 1); });
+  lightbox.append(prev, next, dots);
+  clearTimeout(lightboxControlsTimer);
+  lightboxControlsTimer = setTimeout(() => lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.classList.add("controls-fade")), 2600);
 }
-
-/* dots + which arrow buttons are possible (only when the post has 2+ photos) */
-function updateLightboxNav(){
-  const n = lbGroup.length;
-  lightboxDots.classList.toggle("on", n > 1);
-  lightboxDots.innerHTML = n > 1
-    ? lbGroup.map((_, i) => `<button type="button" class="lightbox-dot${i === lbIndex ? " active" : ""}" data-i="${i}" aria-label="ছবি ${i + 1}"></button>`).join("")
-    : "";
-  lightboxPrev.classList.toggle("available", n > 1 && lbIndex > 0);
-  lightboxNext.classList.toggle("available", n > 1 && lbIndex < n - 1);
-}
-
-/* arrow buttons appear for a moment, then disappear again */
-function flashLightboxNav(){
-  if(lbGroup.length < 2) return;
-  lightbox.classList.add("show-nav");
-  clearTimeout(lbNavTimer);
-  lbNavTimer = setTimeout(() => lightbox.classList.remove("show-nav"), LB_NAV_MS);
-}
-function holdLightboxNav(){ clearTimeout(lbNavTimer); }
-
-function goLightboxTo(i){
-  if(lbGroup.length < 2 || i < 0 || i >= lbGroup.length || i === lbIndex) return;
-  lbIndex = i;
-  const thumb = lbGroup[i];
-  const im = thumb.querySelector("img");
-  const src = thumb.dataset.src;
-  const preview = (im && im.naturalWidth) ? (im.currentSrc || im.src) : thumbUrl(src);
-  renderLightboxImage(src, preview, ++lightboxToken);
-  updateLightboxNav();
-  flashLightboxNav();
-}
-
-function openLightbox(kind, src, preview, group, index){
-  if(kind !== "img" && kind !== "vid" && kind !== "aud") return;
+function openLightbox(kind, src, preview, keepNavigation = false){
   const s = escapeHtml(src);
   const token = ++lightboxToken;
-  lbGroup = (kind === "img" && group && group.length > 1) ? group : [];
-  lbIndex = lbGroup.length ? Math.max(0, index || 0) : 0;
-  if(kind === "img") renderLightboxImage(src, preview, token);
+  if(!keepNavigation && kind !== "img") lightboxImages = [];
+  if(!keepNavigation) lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.remove());
+  if(kind === "img"){
+    const first = (preview && preview !== src) ? preview : src;
+    lightboxStage.innerHTML = `
+      <img src="${escapeHtml(first)}" alt="" decoding="async">
+      <a class="lightbox-original" href="${s}" target="_blank" rel="noopener">মূল ছবি নতুন ট্যাবে দেখো (আসল কোয়ালিটি)</a>`;
+    const im = lightboxStage.querySelector("img");
+    let triedOriginal = (first === src);
+    im.addEventListener("error", () => {
+      if(token !== lightboxToken) return;
+      if(!triedOriginal){ triedOriginal = true; im.src = src; return; }
+      im.outerHTML = `<p class="lightbox-msg">ছবিটা লোড করা যায়নি।</p>`;
+    });
+    if(first !== src){
+      const hi = new Image();
+      hi.onload = () => {
+        if(token !== lightboxToken) return;
+        const cur = lightboxStage.querySelector("img");
+        if(cur) cur.src = src;
+      };
+      hi.src = src;
+    }
+  }
   else if(kind === "vid") lightboxStage.innerHTML = `<video src="${s}" controls autoplay playsinline></video>`;
-  else lightboxStage.innerHTML = `<audio src="${s}" controls autoplay></audio>`;
+  else if(kind === "aud") lightboxStage.innerHTML = `<audio src="${s}" controls autoplay></audio>`;
+  else return;
   lightbox.classList.add("open");
-  updateLightboxNav();
-  flashLightboxNav();
+  if(keepNavigation && lightboxImages.length > 1) addLightboxNavigation();
 }
 function closeLightbox(){
   lightboxToken++;
-  clearTimeout(lbNavTimer);
-  lightbox.classList.remove("show-nav");
-  lbGroup = [];
-  lbIndex = 0;
-  updateLightboxNav();
+  clearTimeout(lightboxControlsTimer);
+  lightboxImages = [];
+  lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.remove());
   const playing = lightboxStage.querySelector("video, audio");
   if(playing){ try{ playing.pause(); }catch(e){} }
   lightbox.classList.remove("open");
@@ -572,41 +526,11 @@ document.getElementById("lightboxClose").addEventListener("click", closeLightbox
 lightbox.addEventListener("click", e => {
   if(e.target === lightbox || e.target === lightboxStage) closeLightbox();
 });
-
-lightboxPrev.addEventListener("click", () => goLightboxTo(lbIndex - 1));
-lightboxNext.addEventListener("click", () => goLightboxTo(lbIndex + 1));
-[lightboxPrev, lightboxNext].forEach(b => {
-  b.addEventListener("mouseenter", holdLightboxNav);
-  b.addEventListener("mouseleave", flashLightboxNav);
-});
-lightboxDots.addEventListener("click", e => {
-  const d = e.target.closest(".lightbox-dot");
-  if(d) goLightboxTo(Number(d.dataset.i));
-});
-/* tap/click on the photo, or moving the mouse, brings the buttons back for a moment */
-lightboxStage.addEventListener("click", e => { if(e.target.closest("img")) flashLightboxNav(); });
-lightbox.addEventListener("pointermove", e => { if(e.pointerType === "mouse") flashLightboxNav(); });
-
-/* swipe left / right on touch screens */
-let swipeX = null, swipeY = null;
-lightbox.addEventListener("touchstart", e => {
-  if(e.touches.length === 1){ swipeX = e.touches[0].clientX; swipeY = e.touches[0].clientY; }
-  else swipeX = null;
-}, { passive:true });
-lightbox.addEventListener("touchend", e => {
-  if(swipeX === null || !e.changedTouches.length) return;
-  const dx = e.changedTouches[0].clientX - swipeX;
-  const dy = e.changedTouches[0].clientY - swipeY;
-  swipeX = null;
-  if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goLightboxTo(lbIndex + (dx < 0 ? 1 : -1));
-}, { passive:true });
-
 document.addEventListener("keydown", e => {
   if(lightbox.classList.contains("open")){
-    if(e.key === "Escape") closeLightbox();
-    else if(e.key === "ArrowLeft") goLightboxTo(lbIndex - 1);
-    else if(e.key === "ArrowRight") goLightboxTo(lbIndex + 1);
-    return;
+    if(e.key === "Escape"){ closeLightbox(); return; }
+    if(lightboxImages.length > 1 && e.key === "ArrowLeft"){ renderLightboxImage(lightboxImageIndex - 1); return; }
+    if(lightboxImages.length > 1 && e.key === "ArrowRight"){ renderLightboxImage(lightboxImageIndex + 1); return; }
   }
   if(e.key === "Escape" && feedOverlay.classList.contains("open")) closeFeed();
 });
@@ -625,13 +549,7 @@ feedPosts.addEventListener("click", e => {
   if(thumb){
     const im = thumb.querySelector("img");
     const preview = (im && im.naturalWidth) ? (im.currentSrc || im.src) : "";
-    let group = null, index = 0;
-    if(thumb.dataset.kind === "img"){
-      const wrap = thumb.closest(".post-media");
-      group = wrap ? Array.from(wrap.querySelectorAll('.media-thumb[data-kind="img"]')) : [thumb];
-      index = group.indexOf(thumb);
-    }
-    openLightbox(thumb.dataset.kind, thumb.dataset.src, preview, group, index);
+    openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
     return;
   }
   const aud = e.target.closest(".post-audio");
@@ -709,3 +627,23 @@ async function loadTeachers(){
 }
 
 loadTeachers();
+
+const UNSTOPPABLE_START = new Date(2026, 8, 24, 0, 0, 0);
+const pDays = document.getElementById("pDays");
+const pHours = document.getElementById("pHours");
+const pMins = document.getElementById("pMins");
+const pSecs = document.getElementById("pSecs");
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function setText(el, v){ if(el.textContent !== v) el.textContent = v; }
+
+function updatePulse(){
+  const now = Date.now();
+  const diff = Math.max(0, now - UNSTOPPABLE_START.getTime());
+  const totalSec = Math.floor(diff/1000);
+  setText(pDays, String(Math.floor(totalSec/86400)));
+  setText(pHours, pad(Math.floor((totalSec%86400)/3600)));
+  setText(pMins, pad(Math.floor((totalSec%3600)/60)));
+  setText(pSecs, pad(totalSec%60));
+}
+if(pDays){ updatePulse(); setInterval(updatePulse, 1000); }

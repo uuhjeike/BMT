@@ -24,6 +24,7 @@
     <a href="#teachers">শিক্ষকবৃন্দ</a>
     <a href="https://uuhjeike.github.io/BMT-Notes/" target="_blank" rel="noopener">নোটস</a>
     <button type="button" class="nav-btn" id="navSocial">যোগাযোগ</button>
+    <a href="#unstoppable">অদম্য</a>
   </div>
 </nav>
 
@@ -75,6 +76,21 @@
   <p>বানানো হয়েছে যত্ন করে, নিজেদের পড়াশোনার জন্য।</p>
 </footer>
 
+<!-- ===== UNSTOPPABLE — the stopwatch, at the very bottom of everything ===== -->
+<section class="unstoppable" id="unstoppable">
+  <div class="unstoppable-inner">
+    <span class="unstoppable-orb"></span>
+    <p class="unstoppable-tag">UNSTOPPABLE</p>
+    <p class="unstoppable-since">২৪ সেপ্টেম্বর ২০২৬ থেকে অবিরাম</p>
+    <div class="unstoppable-clock">
+      <div class="unstoppable-unit"><span id="pDays">0</span><small>দিন</small></div>
+      <div class="unstoppable-unit"><span id="pHours">00</span><small>ঘণ্টা</small></div>
+      <div class="unstoppable-unit"><span id="pMins">00</span><small>মিনিট</small></div>
+      <div class="unstoppable-unit"><span id="pSecs">00</span><small>সেকেন্ড</small></div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== SUBJECT FEED PANEL ===== -->
 <div class="feed-overlay" id="feedOverlay">
   <div class="feed-panel" id="feedPanel" role="dialog" aria-modal="true" aria-labelledby="feedTitle">
@@ -97,13 +113,6 @@
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
   <button class="lightbox-close" id="lightboxClose" aria-label="বন্ধ করো">
     <svg viewBox="0 0 24 24"><path d="M5 5 L19 19 M19 5 L5 19"/></svg>
-  </button>
-  <div class="lightbox-dots" id="lightboxDots"></div>
-  <button class="lightbox-nav lightbox-prev" id="lightboxPrev" type="button" aria-label="আগের ছবি">
-    <svg viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19"/></svg>
-  </button>
-  <button class="lightbox-nav lightbox-next" id="lightboxNext" type="button" aria-label="পরের ছবি">
-    <svg viewBox="0 0 24 24"><path d="M9 5 L16 12 L9 19"/></svg>
   </button>
   <div class="lightbox-stage" id="lightboxStage"></div>
 </div>
