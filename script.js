@@ -76,17 +76,17 @@ function youTubeEmbedUrl(url){
 function platformInfo(url){
   let host = "";
   try{ host = new URL(url).hostname.replace(/^www\./,""); }catch(e){}
-  if(/youtube\.com$\vert{}youtu\.be$/.test(host)) return { label:"ইউটিউব", icon:"youtube" };
-  if(/facebook\.com$\vert{}fb\.watch$/.test(host)) return { label:"ফেসবুক", icon:"facebook" };
+  if(/(^|\.)youtube\.com$|(^|\.)youtu\.be$/.test(host)) return { label:"ইউটিউব", icon:"youtube" };
+  if(/(^|\.)facebook\.com$|(^|\.)fb\.watch$/.test(host)) return { label:"ফেসবুক", icon:"facebook" };
   if(/instagram\.com$/.test(host)) return { label:"ইনস্টাগ্রাম", icon:"instagram" };
   if(/tiktok\.com$/.test(host)) return { label:"টিকটক", icon:"tiktok" };
-  if(/t\.me$\vert{}telegram\.org$/.test(host)) return { label:"টেলিগ্রাম", icon:"chat" };
-  if(/wa\.me$\vert{}whatsapp\.com$/.test(host)) return { label:"হোয়াটসঅ্যাপ", icon:"whatsapp" };
+  if(/(^|\.)t\.me$|(^|\.)telegram\.org$/.test(host)) return { label:"টেলিগ্রাম", icon:"chat" };
+  if(/(^|\.)wa\.me$|(^|\.)whatsapp\.com$/.test(host)) return { label:"হোয়াটসঅ্যাপ", icon:"whatsapp" };
   if(/drive\.google\.com$/.test(host)) return { label:"ড্রাইভ ফাইল", icon:"drive" };
   return { label:"লিংক", icon:"link" };
 }
 
-const PHOTO_RESIZER = false; // Use original image URLs; preserve full source quality and aspect ratio.
+const PHOTO_RESIZER = true;
 const THUMB_WIDTH = 1200;
 function thumbUrl(src){
   if(!PHOTO_RESIZER || !/^https?:\/\//i.test(src) || /\.gif(\?.*)?$/i.test(src)) return src;
@@ -194,16 +194,14 @@ function escapeHtml(s){
 }
 
 function mediaThumbHtml(kind, src, index, total){
-  const s = escapeHtml(src);
+  const safe = escapeHtml(src);
   if(kind === "img"){
-    return `<div class="media-thumb is-img" data-kind="img" data-src="${s}" role="button" tabindex="0" aria-label="ছবি ${index+1} বড় করে দেখো">
-      <img alt="" decoding="async">
-      <span class="photostack-badge">${index + 1} / ${total}</span>
+    return `<div class="media-thumb is-img gallery-slide${index === 0 ? ' is-active' : ''}" data-kind="img" data-src="${safe}" role="button" tabindex="${index === 0 ? '0' : '-1'}" aria-label="ছবি ${index+1} বড় করে দেখো" ${index === 0 ? '' : 'hidden'}>
+      <img alt="ছবি ${index+1}" decoding="async" loading="lazy">
     </div>`;
   }
-  return `<div class="media-thumb is-vid" data-kind="vid" data-src="${s}" role="button" tabindex="0" aria-label="ভিডিও চালাও">
-    <video muted playsinline preload="metadata"></video>
-    <div class="media-play">${icon("play")}</div>
+  return `<div class="media-thumb is-vid" data-kind="vid" data-src="${safe}" role="button" tabindex="0" aria-label="ভিডিও চালাও">
+    <video muted playsinline preload="metadata"></video><div class="media-play">${icon("play")}</div>
   </div>`;
 }
 
@@ -217,46 +215,36 @@ function embedHtml(e){
 }
 
 function renderPost(post){
-  const media = [
-    ...post.images.map(src=>({kind:"img",src})),
-    ...post.videos.map(src=>({kind:"vid",src})),
-  ];
-  
-  const totalImgs = post.images.length;
-  const mediaHtml = media.length
-    ? `<div class="post-media ${totalImgs > 1 ? 'photostack-group' : ''} ${totalImgs > 1 && media.every(m=>m.kind === "img") ? `photo-grid photo-grid-${totalImgs === 2 ? 2 : 3}` : ''}" data-photo-count="${totalImgs}">${media.map((m,i)=>mediaThumbHtml(m.kind, m.src, i, m.kind === "img" ? totalImgs : 0)).join("")}</div>`
-    : "";
-    
+  const images = post.images || [];
+  const videos = post.videos || [];
+  const gallery = images.length ? `
+    <div class="photo-gallery" data-gallery-count="${images.length}">
+      <div class="photo-gallery-stage">${images.map((src,i)=>mediaThumbHtml("img",src,i,images.length)).join("")}</div>
+      ${images.length > 1 ? `<button class="gallery-nav gallery-prev" type="button" aria-label="আগের ছবি" disabled>‹</button><button class="gallery-nav gallery-next" type="button" aria-label="পরের ছবি">›</button><span class="gallery-counter" aria-live="polite">1 / ${images.length}</span>` : ''}
+    </div>` : "";
+  const videosHtml = videos.map((src,i)=>mediaThumbHtml("vid",src,i,videos.length)).join("");
+  const mediaHtml = (gallery || videosHtml) ? `<div class="post-media">${gallery}${videosHtml}</div>` : "";
   const embedsHtml = (post.embeds||[]).map(embedHtml).join("");
   const audioHtml = post.audios.map(src=>`
     <div class="post-audio" data-src="${escapeHtml(src)}" role="button" tabindex="0">
-      <span class="post-audio-icon">${icon("play")}</span>
-      <span class="post-audio-label">অডিও শুনতে ক্লিক করো</span>
+      <span class="post-audio-icon">${icon("play")}</span><span class="post-audio-label">অডিও শুনতে ক্লিক করো</span>
     </div>`).join("");
-  const linksHtml = post.links.length
-    ? `<div class="post-links">${post.links.map(l=>`
-        <a class="post-link" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">
-          ${icon(l.kind)}${escapeHtml(l.label)}
-        </a>`).join("")}</div>`
-    : "";
-    
+  const linksHtml = post.links.length ? `<div class="post-links">${post.links.map(l=>`
+    <a class="post-link" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">${icon(l.kind)}${escapeHtml(l.label)}</a>`).join("")}</div>` : "";
   return `<article class="post">
     ${post.date ? `<p class="post-date">${escapeHtml(post.date)}</p>` : ""}
     ${post.text ? `<p class="post-text">${escapeHtml(post.text)}</p>` : ""}
-    ${mediaHtml}
-    ${embedsHtml}
-    ${audioHtml}
-    ${linksHtml}
-  </article><div class="post-divider"><span>✦ BMT ✦</span></div>`;
+    ${mediaHtml}${embedsHtml}${audioHtml}${linksHtml}
+    <div class="post-divider" aria-hidden="true"><span>✦ BMT ✦</span></div>
+  </article>`;
 }
 
 let mediaObserver = null;
 
 function sizeThumbToMedia(thumb, w, h){
   if(!w || !h) return;
-  const grouped = !!thumb.closest(".photo-grid");
-  if(!grouped) thumb.style.aspectRatio = w + " / " + h;
-  if(thumb.dataset.kind === "img" && !grouped) thumb.style.maxWidth = w + "px";
+  thumb.style.aspectRatio = w + " / " + h;
+  if(thumb.dataset.kind === "img") thumb.style.maxWidth = w + "px";
 }
 
 function loadThumbMedia(thumb){
@@ -295,7 +283,7 @@ function loadThumbMedia(thumb){
 
 function observeMedia(scope, rootEl){
   if(mediaObserver){ mediaObserver.disconnect(); mediaObserver = null; }
-  const thumbs = scope.querySelectorAll(".media-thumb");
+  const thumbs = scope.querySelectorAll(".media-thumb:not([hidden])");
   if(!thumbs.length) return;
   if(!("IntersectionObserver" in window)){
     thumbs.forEach(loadThumbMedia);
@@ -343,8 +331,9 @@ const feedBody = document.getElementById("feedBody");
 
 let feedToken = 0;
 
-/* Render every post in the selected subject. Keep lazy media loading for performance. */
+/* Virtualized windowing parameters */
 let currentPostsAll = [];
+const CHUNK_SIZE = 6;
 let renderedCount = 0;
 
 function renderChunk(postsToRender) {
@@ -354,10 +343,24 @@ function renderChunk(postsToRender) {
 }
 
 function handleFeedScroll() {
-  /* All posts remain in the document; scrolling never deletes earlier posts. */
+  if (!feedBody) return;
+  const scrollTop = feedBody.scrollTop;
+  const scrollHeight = feedBody.scrollHeight;
+  const clientHeight = feedBody.clientHeight;
+
+  // Load more down
+  if (scrollTop + clientHeight >= scrollHeight - 300) {
+    if (renderedCount < currentPostsAll.length) {
+      const nextBatch = currentPostsAll.slice(renderedCount, renderedCount + CHUNK_SIZE);
+      renderedCount += nextBatch.length;
+      renderChunk(nextBatch);
+    }
+  }
+
+  // Never discard already-rendered posts: scrolling back up must preserve the full feed.
 }
 
-feedBody.addEventListener("scroll", handleFeedScroll, { passive: true });
+feedBody.addEventListener('scroll', handleFeedScroll);
 
 async function openFeed({kicker, title, emptyText, loader}){
   const token = ++feedToken;
@@ -382,8 +385,9 @@ async function openFeed({kicker, title, emptyText, loader}){
       feedEmpty.textContent = emptyText || "এখনো কোনো পোস্ট নেই। প্রথম হোমওয়ার্কটা এখানেই যোগ হবে।";
       return;
     }
-    renderedCount = currentPostsAll.length;
-    renderChunk(currentPostsAll);
+    const initialBatch = currentPostsAll.slice(0, CHUNK_SIZE);
+    renderedCount = initialBatch.length;
+    renderChunk(initialBatch);
   }catch(err){
     if(token !== feedToken) return;
     feedLoading.hidden = true;
@@ -448,42 +452,9 @@ const lightbox = document.getElementById("lightbox");
 const lightboxStage = document.getElementById("lightboxStage");
 
 let lightboxToken = 0;
-let lightboxImages = [];
-let lightboxImageIndex = 0;
-let lightboxControlsTimer = 0;
-
-function renderLightboxImage(index){
-  if(!lightboxImages.length) return;
-  lightboxImageIndex = (index + lightboxImages.length) % lightboxImages.length;
-  const item = lightboxImages[lightboxImageIndex];
-  openLightbox("img", item.src, item.preview || item.src, true);
-  if(lightboxImages.length > 1) addLightboxNavigation();
-}
-function addLightboxNavigation(){
-  lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.remove());
-  if(lightboxImages.length < 2) return;
-  const prev = document.createElement("button");
-  prev.className = "lightbox-nav lightbox-prev";
-  prev.type = "button"; prev.setAttribute("aria-label", "আগের ছবি"); prev.textContent = "‹";
-  const next = document.createElement("button");
-  next.className = "lightbox-nav lightbox-next";
-  next.type = "button"; next.setAttribute("aria-label", "পরের ছবি"); next.textContent = "›";
-  const dots = document.createElement("div"); dots.className = "lightbox-dots";
-  lightboxImages.forEach((_, i) => {
-    const dot = document.createElement("button"); dot.type = "button"; dot.className = "lightbox-dot" + (i === lightboxImageIndex ? " active" : "");
-    dot.setAttribute("aria-label", `ছবি ${i+1}`); dot.addEventListener("click", e => { e.stopPropagation(); renderLightboxImage(i); }); dots.appendChild(dot);
-  });
-  prev.addEventListener("click", e => { e.stopPropagation(); renderLightboxImage(lightboxImageIndex - 1); });
-  next.addEventListener("click", e => { e.stopPropagation(); renderLightboxImage(lightboxImageIndex + 1); });
-  lightbox.append(prev, next, dots);
-  clearTimeout(lightboxControlsTimer);
-  lightboxControlsTimer = setTimeout(() => lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.classList.add("controls-fade")), 2600);
-}
-function openLightbox(kind, src, preview, keepNavigation = false){
+function openLightbox(kind, src, preview){
   const s = escapeHtml(src);
   const token = ++lightboxToken;
-  if(!keepNavigation && kind !== "img") lightboxImages = [];
-  if(!keepNavigation) lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.remove());
   if(kind === "img"){
     const first = (preview && preview !== src) ? preview : src;
     lightboxStage.innerHTML = `
@@ -510,13 +481,9 @@ function openLightbox(kind, src, preview, keepNavigation = false){
   else if(kind === "aud") lightboxStage.innerHTML = `<audio src="${s}" controls autoplay></audio>`;
   else return;
   lightbox.classList.add("open");
-  if(keepNavigation && lightboxImages.length > 1) addLightboxNavigation();
 }
 function closeLightbox(){
   lightboxToken++;
-  clearTimeout(lightboxControlsTimer);
-  lightboxImages = [];
-  lightbox.querySelectorAll(".lightbox-nav, .lightbox-dots").forEach(el => el.remove());
   const playing = lightboxStage.querySelector("video, audio");
   if(playing){ try{ playing.pause(); }catch(e){} }
   lightbox.classList.remove("open");
@@ -526,27 +493,10 @@ document.getElementById("lightboxClose").addEventListener("click", closeLightbox
 lightbox.addEventListener("click", e => {
   if(e.target === lightbox || e.target === lightboxStage) closeLightbox();
 });
-let lightboxTouchStart = null;
-lightboxStage.addEventListener("touchstart", e => {
-  if(!lightbox.classList.contains("open") || lightboxImages.length < 2 || !e.touches.length) return;
-  lightboxTouchStart = { x:e.touches[0].clientX, y:e.touches[0].clientY };
-}, { passive:true });
-lightboxStage.addEventListener("touchend", e => {
-  if(!lightboxTouchStart || !e.changedTouches.length) return;
-  const dx = e.changedTouches[0].clientX - lightboxTouchStart.x;
-  const dy = e.changedTouches[0].clientY - lightboxTouchStart.y;
-  lightboxTouchStart = null;
-  if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.15){
-    renderLightboxImage(lightboxImageIndex + (dx < 0 ? 1 : -1));
-  }
-}, { passive:true });
 document.addEventListener("keydown", e => {
-  if(lightbox.classList.contains("open")){
-    if(e.key === "Escape"){ closeLightbox(); return; }
-    if(lightboxImages.length > 1 && e.key === "ArrowLeft"){ renderLightboxImage(lightboxImageIndex - 1); return; }
-    if(lightboxImages.length > 1 && e.key === "ArrowRight"){ renderLightboxImage(lightboxImageIndex + 1); return; }
-  }
-  if(e.key === "Escape" && feedOverlay.classList.contains("open")) closeFeed();
+  if(e.key !== "Escape") return;
+  if(lightbox.classList.contains("open")) closeLightbox();
+  else if(feedOverlay.classList.contains("open")) closeFeed();
 });
 
 function playEmbed(el){
@@ -559,23 +509,26 @@ function playEmbed(el){
 }
 
 feedPosts.addEventListener("click", e => {
+  const nav = e.target.closest(".gallery-nav");
+  if(nav){
+    const gallery = nav.closest(".photo-gallery");
+    const slides = Array.from(gallery.querySelectorAll(".gallery-slide"));
+    let index = slides.findIndex(slide => !slide.hidden);
+    index = Math.max(0, Math.min(slides.length - 1, index + (nav.classList.contains("gallery-next") ? 1 : -1)));
+    slides.forEach((slide,i) => { slide.hidden = i !== index; slide.classList.toggle("is-active", i === index); slide.tabIndex = i === index ? 0 : -1; });
+    const counter = gallery.querySelector(".gallery-counter");
+    if(counter) counter.textContent = `${index+1} / ${slides.length}`;
+    const prev = gallery.querySelector(".gallery-prev"), next = gallery.querySelector(".gallery-next");
+    if(prev) prev.disabled = index === 0;
+    if(next) next.disabled = index === slides.length - 1;
+    observeMedia(feedPosts, feedBody);
+    return;
+  }
   const thumb = e.target.closest(".media-thumb");
   if(thumb){
     const im = thumb.querySelector("img");
     const preview = (im && im.naturalWidth) ? (im.currentSrc || im.src) : "";
-    if(thumb.dataset.kind === "img"){
-      const post = thumb.closest(".post");
-      const thumbs = post ? Array.from(post.querySelectorAll(".post-media .media-thumb.is-img")) : [thumb];
-      lightboxImages = thumbs.map(t => {
-        const image = t.querySelector("img");
-        return { src:t.dataset.src, preview:(image && image.naturalWidth) ? (image.currentSrc || image.src) : t.dataset.src };
-      });
-      lightboxImageIndex = Math.max(0, thumbs.indexOf(thumb));
-      if(lightboxImages.length > 1) renderLightboxImage(lightboxImageIndex);
-      else { lightboxImages = []; openLightbox("img", thumb.dataset.src, preview); }
-    } else {
-      openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
-    }
+    openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
     return;
   }
   const aud = e.target.closest(".post-audio");
@@ -583,6 +536,22 @@ feedPosts.addEventListener("click", e => {
   const emb = e.target.closest(".post-embed[data-embed]");
   if(emb){ playEmbed(emb); }
 });
+
+let galleryTouchStart = null;
+feedPosts.addEventListener("touchstart", e => {
+  const stage = e.target.closest(".photo-gallery-stage");
+  if(!stage || !e.touches || e.touches.length !== 1) return;
+  galleryTouchStart = { x:e.touches[0].clientX, y:e.touches[0].clientY, stage };
+}, {passive:true});
+feedPosts.addEventListener("touchend", e => {
+  if(!galleryTouchStart || !e.changedTouches || !e.changedTouches.length) return;
+  const start = galleryTouchStart; galleryTouchStart = null;
+  const dx = e.changedTouches[0].clientX - start.x, dy = e.changedTouches[0].clientY - start.y;
+  if(Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+  const gallery = start.stage.closest(".photo-gallery");
+  const button = gallery && gallery.querySelector(dx < 0 ? ".gallery-next" : ".gallery-prev");
+  if(button && !button.disabled) button.click();
+}, {passive:true});
 
 feedPosts.addEventListener("keydown", e => {
   if(e.key !== "Enter" && e.key !== " ") return;
@@ -664,8 +633,7 @@ function pad(n){ return String(n).padStart(2,"0"); }
 function setText(el, v){ if(el.textContent !== v) el.textContent = v; }
 
 function updatePulse(){
-  const now = Date.now();
-  const diff = Math.max(0, now - UNSTOPPABLE_START.getTime());
+  const diff = Math.max(0, Date.now() - UNSTOPPABLE_START.getTime());
   const totalSec = Math.floor(diff/1000);
   setText(pDays, String(Math.floor(totalSec/86400)));
   setText(pHours, pad(Math.floor((totalSec%86400)/3600)));
