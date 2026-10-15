@@ -529,6 +529,23 @@ function closeLightbox(){
 document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
 if(lightboxPrev) lightboxPrev.addEventListener("click", () => renderLightboxPhoto(lightboxIndex - 1));
 if(lightboxNext) lightboxNext.addEventListener("click", () => renderLightboxPhoto(lightboxIndex + 1));
+
+// Full-size viewer navigation: swipe horizontally on touch devices, while
+// keeping the desktop arrow buttons and keyboard controls available.
+let lightboxTouchStart = null;
+lightbox.addEventListener("touchstart", e => {
+  if(!lightbox.classList.contains("open") || lightboxGallery.length < 2 || !e.touches || e.touches.length !== 1) return;
+  lightboxTouchStart = { x:e.touches[0].clientX, y:e.touches[0].clientY };
+}, {passive:true});
+lightbox.addEventListener("touchend", e => {
+  if(!lightboxTouchStart || !e.changedTouches || !e.changedTouches.length) return;
+  const start = lightboxTouchStart;
+  lightboxTouchStart = null;
+  const dx = e.changedTouches[0].clientX - start.x;
+  const dy = e.changedTouches[0].clientY - start.y;
+  if(Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
+  renderLightboxPhoto(lightboxIndex + (dx < 0 ? 1 : -1));
+}, {passive:true});
 lightbox.addEventListener("click", e => {
   if(e.target === lightbox || e.target === lightboxStage) closeLightbox();
 });
