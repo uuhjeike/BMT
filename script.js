@@ -86,7 +86,7 @@ function platformInfo(url){
   return { label:"লিংক", icon:"link" };
 }
 
-const PHOTO_RESIZER = true;
+const PHOTO_RESIZER = false; // Use original image URLs; preserve full source quality and aspect ratio.
 const THUMB_WIDTH = 1200;
 function thumbUrl(src){
   if(!PHOTO_RESIZER || !/^https?:\/\//i.test(src) || /\.gif(\?.*)?$/i.test(src)) return src;
@@ -526,6 +526,20 @@ document.getElementById("lightboxClose").addEventListener("click", closeLightbox
 lightbox.addEventListener("click", e => {
   if(e.target === lightbox || e.target === lightboxStage) closeLightbox();
 });
+let lightboxTouchStart = null;
+lightboxStage.addEventListener("touchstart", e => {
+  if(!lightbox.classList.contains("open") || lightboxImages.length < 2 || !e.touches.length) return;
+  lightboxTouchStart = { x:e.touches[0].clientX, y:e.touches[0].clientY };
+}, { passive:true });
+lightboxStage.addEventListener("touchend", e => {
+  if(!lightboxTouchStart || !e.changedTouches.length) return;
+  const dx = e.changedTouches[0].clientX - lightboxTouchStart.x;
+  const dy = e.changedTouches[0].clientY - lightboxTouchStart.y;
+  lightboxTouchStart = null;
+  if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.15){
+    renderLightboxImage(lightboxImageIndex + (dx < 0 ? 1 : -1));
+  }
+}, { passive:true });
 document.addEventListener("keydown", e => {
   if(lightbox.classList.contains("open")){
     if(e.key === "Escape"){ closeLightbox(); return; }
@@ -549,7 +563,19 @@ feedPosts.addEventListener("click", e => {
   if(thumb){
     const im = thumb.querySelector("img");
     const preview = (im && im.naturalWidth) ? (im.currentSrc || im.src) : "";
-    openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
+    if(thumb.dataset.kind === "img"){
+      const post = thumb.closest(".post");
+      const thumbs = post ? Array.from(post.querySelectorAll(".post-media .media-thumb.is-img")) : [thumb];
+      lightboxImages = thumbs.map(t => {
+        const image = t.querySelector("img");
+        return { src:t.dataset.src, preview:(image && image.naturalWidth) ? (image.currentSrc || image.src) : t.dataset.src };
+      });
+      lightboxImageIndex = Math.max(0, thumbs.indexOf(thumb));
+      if(lightboxImages.length > 1) renderLightboxImage(lightboxImageIndex);
+      else { lightboxImages = []; openLightbox("img", thumb.dataset.src, preview); }
+    } else {
+      openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
+    }
     return;
   }
   const aud = e.target.closest(".post-audio");
