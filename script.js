@@ -87,10 +87,10 @@ function platformInfo(url){
 }
 
 const PHOTO_RESIZER = true;
-const THUMB_WIDTH = 1200;
+const THUMB_WIDTH = 960;
 function thumbUrl(src){
   if(!PHOTO_RESIZER || !/^https?:\/\//i.test(src) || /\.gif(\?.*)?$/i.test(src)) return src;
-  return "https://wsrv.nl/?url=" + encodeURIComponent(src) + "&w=" + THUMB_WIDTH + "&we&q=80&output=webp";
+  return "https://wsrv.nl/?url=" + encodeURIComponent(src) + "&w=" + THUMB_WIDTH + "&q=76&output=webp";
 }
 
 const IMG_EXT_RE = /\.(jpe?g|png|gif|webp|avif|bmp)(\?.*)?$/i;
@@ -273,6 +273,7 @@ function loadThumbMedia(thumb){
     if(!usedOriginal){
       timer = setTimeout(() => { if(!media.naturalWidth) useOriginal(); }, 9000);
     }
+    media.fetchPriority = thumb.classList.contains("is-active") ? "high" : "auto";
     media.src = fast;
   } else {
     media.addEventListener("loadedmetadata", () => sizeThumbToMedia(thumb, media.videoWidth, media.videoHeight), { once:true });
@@ -450,36 +451,71 @@ feedOverlay.addEventListener("click", e => { if(e.target === feedOverlay) closeF
 
 const lightbox = document.getElementById("lightbox");
 const lightboxStage = document.getElementById("lightboxStage");
-
+const lightboxPrev = document.getElementById("lightboxPrev");
+const lightboxNext = document.getElementById("lightboxNext");
+const lightboxCounter = document.getElementById("lightboxCounter");
 let lightboxToken = 0;
-function openLightbox(kind, src, preview){
-  const s = escapeHtml(src);
+let lightboxGallery = [];
+let lightboxIndex = 0;
+
+function renderLightboxPhoto(index){
+  if(!lightboxGallery.length) return;
+  lightboxIndex = Math.max(0, Math.min(lightboxGallery.length - 1, index));
+  const item = lightboxGallery[lightboxIndex];
   const token = ++lightboxToken;
-  if(kind === "img"){
-    const first = (preview && preview !== src) ? preview : src;
-    lightboxStage.innerHTML = `
-      <img src="${escapeHtml(first)}" alt="" decoding="async">
-      <a class="lightbox-original" href="${s}" target="_blank" rel="noopener">মূল ছবি নতুন ট্যাবে দেখো (আসল কোয়ালিটি)</a>`;
-    const im = lightboxStage.querySelector("img");
-    let triedOriginal = (first === src);
-    im.addEventListener("error", () => {
+  const src = item.src;
+  const preview = item.preview || thumbUrl(src);
+  lightboxStage.innerHTML = `<img src="${escapeHtml(preview)}" alt="ছবি ${lightboxIndex+1}" decoding="async" fetchpriority="high"><a class="lightbox-original" href="${escapeHtml(src)}" target="_blank" rel="noopener">মূল ছবি নতুন ট্যাবে দেখো (আসল কোয়ালিটি)</a>`;
+  const im = lightboxStage.querySelector("img");
+  im.addEventListener("error", () => {
+    if(token !== lightboxToken) return;
+    if(im.src !== src) im.src = src;
+    else im.outerHTML = `<p class="lightbox-msg">ছবিটা লোড করা যায়নি।</p>`;
+  });
+  // Show the lightweight preview first, then upgrade to the original when it finishes loading.
+  if(preview !== src){
+    const original = new Image();
+    original.decoding = "async";
+    original.onload = () => {
       if(token !== lightboxToken) return;
-      if(!triedOriginal){ triedOriginal = true; im.src = src; return; }
-      im.outerHTML = `<p class="lightbox-msg">ছবিটা লোড করা যায়নি।</p>`;
-    });
-    if(first !== src){
-      const hi = new Image();
-      hi.onload = () => {
-        if(token !== lightboxToken) return;
-        const cur = lightboxStage.querySelector("img");
-        if(cur) cur.src = src;
-      };
-      hi.src = src;
-    }
+      const current = lightboxStage.querySelector("img");
+      if(current) current.src = src;
+    };
+    original.src = src;
   }
-  else if(kind === "vid") lightboxStage.innerHTML = `<video src="${s}" controls autoplay playsinline></video>`;
-  else if(kind === "aud") lightboxStage.innerHTML = `<audio src="${s}" controls autoplay></audio>`;
-  else return;
+  if(lightboxPrev) lightboxPrev.disabled = lightboxIndex === 0;
+  if(lightboxNext) lightboxNext.disabled = lightboxIndex === lightboxGallery.length - 1;
+  if(lightboxCounter){
+    lightboxCounter.textContent = `${lightboxIndex+1} / ${lightboxGallery.length}`;
+    lightboxCounter.hidden = lightboxGallery.length < 2;
+  }
+  if(lightboxPrev) lightboxPrev.hidden = lightboxGallery.length < 2;
+  if(lightboxNext) lightboxNext.hidden = lightboxGallery.length < 2;
+  // Warm the next image in the background so navigation feels faster.
+  const next = lightboxGallery[lightboxIndex + 1];
+  if(next){ const warm = new Image(); warm.decoding = "async"; warm.src = thumbUrl(next.src); }
+}
+
+function openLightbox(kind, src, preview, galleryItems, galleryIndex){
+  if(kind === "img"){
+    lightboxGallery = Array.isArray(galleryItems) && galleryItems.length
+      ? galleryItems
+      : [{src, preview: preview || ""}];
+    lightboxIndex = Number.isInteger(galleryIndex) ? galleryIndex : 0;
+    renderLightboxPhoto(lightboxIndex);
+  } else if(kind === "vid"){
+    lightboxGallery = [];
+    if(lightboxPrev) lightboxPrev.hidden = true;
+    if(lightboxNext) lightboxNext.hidden = true;
+    if(lightboxCounter) lightboxCounter.hidden = true;
+    lightboxStage.innerHTML = `<video src="${escapeHtml(src)}" controls autoplay playsinline></video>`;
+  } else if(kind === "aud"){
+    lightboxGallery = [];
+    if(lightboxPrev) lightboxPrev.hidden = true;
+    if(lightboxNext) lightboxNext.hidden = true;
+    if(lightboxCounter) lightboxCounter.hidden = true;
+    lightboxStage.innerHTML = `<audio src="${escapeHtml(src)}" controls autoplay></audio>`;
+  } else return;
   lightbox.classList.add("open");
 }
 function closeLightbox(){
@@ -488,15 +524,22 @@ function closeLightbox(){
   if(playing){ try{ playing.pause(); }catch(e){} }
   lightbox.classList.remove("open");
   lightboxStage.innerHTML = "";
+  lightboxGallery = [];
 }
 document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+if(lightboxPrev) lightboxPrev.addEventListener("click", () => renderLightboxPhoto(lightboxIndex - 1));
+if(lightboxNext) lightboxNext.addEventListener("click", () => renderLightboxPhoto(lightboxIndex + 1));
 lightbox.addEventListener("click", e => {
   if(e.target === lightbox || e.target === lightboxStage) closeLightbox();
 });
 document.addEventListener("keydown", e => {
+  if(lightbox.classList.contains("open")){
+    if(e.key === "Escape"){ closeLightbox(); return; }
+    if(e.key === "ArrowLeft" && lightboxGallery.length > 1){ renderLightboxPhoto(lightboxIndex - 1); return; }
+    if(e.key === "ArrowRight" && lightboxGallery.length > 1){ renderLightboxPhoto(lightboxIndex + 1); return; }
+  }
   if(e.key !== "Escape") return;
-  if(lightbox.classList.contains("open")) closeLightbox();
-  else if(feedOverlay.classList.contains("open")) closeFeed();
+  if(feedOverlay.classList.contains("open")) closeFeed();
 });
 
 function playEmbed(el){
@@ -521,6 +564,8 @@ feedPosts.addEventListener("click", e => {
     const prev = gallery.querySelector(".gallery-prev"), next = gallery.querySelector(".gallery-next");
     if(prev) prev.disabled = index === 0;
     if(next) next.disabled = index === slides.length - 1;
+    loadThumbMedia(slides[index]);
+    if(slides[index + 1]) loadThumbMedia(slides[index + 1]);
     observeMedia(feedPosts, feedBody);
     return;
   }
@@ -528,7 +573,16 @@ feedPosts.addEventListener("click", e => {
   if(thumb){
     const im = thumb.querySelector("img");
     const preview = (im && im.naturalWidth) ? (im.currentSrc || im.src) : "";
-    openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
+    if(thumb.dataset.kind === "img"){
+      const gallery = thumb.closest(".photo-gallery");
+      const slides = gallery ? Array.from(gallery.querySelectorAll(".gallery-slide")) : [thumb];
+      const items = slides.map(slide => {
+        const image = slide.querySelector("img");
+        return { src: slide.dataset.src, preview: image && image.naturalWidth ? (image.currentSrc || image.src) : "" };
+      });
+      const index = Math.max(0, slides.indexOf(thumb));
+      openLightbox("img", thumb.dataset.src, preview, items, index);
+    } else openLightbox(thumb.dataset.kind, thumb.dataset.src, preview);
     return;
   }
   const aud = e.target.closest(".post-audio");
