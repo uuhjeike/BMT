@@ -517,12 +517,15 @@ function openLightbox(kind, src, preview, galleryItems, galleryIndex){
     lightboxStage.innerHTML = `<audio src="${escapeHtml(src)}" controls autoplay></audio>`;
   } else return;
   lightbox.classList.add("open");
+  lightbox.classList.remove("mobile-controls-hidden");
+  showMobileLightboxControls();
 }
 function closeLightbox(){
   lightboxToken++;
   const playing = lightboxStage.querySelector("video, audio");
   if(playing){ try{ playing.pause(); }catch(e){} }
-  lightbox.classList.remove("open");
+  lightbox.classList.remove("open", "mobile-controls-hidden");
+  if(mobileControlsTimer) clearTimeout(mobileControlsTimer);
   lightboxStage.innerHTML = "";
   lightboxGallery = [];
 }
@@ -530,11 +533,23 @@ document.getElementById("lightboxClose").addEventListener("click", closeLightbox
 if(lightboxPrev) lightboxPrev.addEventListener("click", () => renderLightboxPhoto(lightboxIndex - 1));
 if(lightboxNext) lightboxNext.addEventListener("click", () => renderLightboxPhoto(lightboxIndex + 1));
 
-// Full-size viewer navigation: swipe horizontally on touch devices, while
-// keeping the desktop arrow buttons and keyboard controls available.
+// Full-size viewer navigation: desktop controls remain unchanged. On phones,
+// arrow buttons briefly appear after touch and then fade away; horizontal swipes
+// remain available across the full-screen image.
 let lightboxTouchStart = null;
+let mobileControlsTimer = null;
+function showMobileLightboxControls(){
+  if(!window.matchMedia("(max-width: 680px)").matches) return;
+  lightbox.classList.remove("mobile-controls-hidden");
+  if(mobileControlsTimer) clearTimeout(mobileControlsTimer);
+  mobileControlsTimer = setTimeout(() => {
+    if(lightbox.classList.contains("open")) lightbox.classList.add("mobile-controls-hidden");
+  }, 1800);
+}
 lightbox.addEventListener("touchstart", e => {
-  if(!lightbox.classList.contains("open") || lightboxGallery.length < 2 || !e.touches || e.touches.length !== 1) return;
+  if(!lightbox.classList.contains("open") || !e.touches || e.touches.length !== 1) return;
+  showMobileLightboxControls();
+  if(lightboxGallery.length < 2) return;
   lightboxTouchStart = { x:e.touches[0].clientX, y:e.touches[0].clientY };
 }, {passive:true});
 lightbox.addEventListener("touchend", e => {
@@ -545,7 +560,11 @@ lightbox.addEventListener("touchend", e => {
   const dy = e.changedTouches[0].clientY - start.y;
   if(Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy) * 1.15) return;
   renderLightboxPhoto(lightboxIndex + (dx < 0 ? 1 : -1));
+  showMobileLightboxControls();
 }, {passive:true});
+if(lightboxPrev) lightboxPrev.addEventListener("click", showMobileLightboxControls);
+if(lightboxNext) lightboxNext.addEventListener("click", showMobileLightboxControls);
+lightbox.addEventListener("mousemove", showMobileLightboxControls, {passive:true});
 lightbox.addEventListener("click", e => {
   if(e.target === lightbox || e.target === lightboxStage) closeLightbox();
 });
